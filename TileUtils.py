@@ -85,6 +85,15 @@ class PalRectangle: #I usually don't do this, but whatever. The main is TileUtil
             self.palette_canvas.itemconfig(self.createanims.current_pal_rectangle, outline=current_rgb) #Outline "" doesn't really work. It leaves some borders.
         self.palette_canvas.itemconfig(self.pal_rectangle, outline="red")
         self.createanims.current_pal_rectangle = self.pal_rectangle
+        self.select_color_picker_rectangle(self.pal) #When a pal rectangle is selected, its corresponding color picker rectangle is selected too. Relatively easy to do thanks to the fact color picker is ordered and fixed!
+
+    def select_color_picker_rectangle(self, pal):
+        color_picker_rectangle_object = self.createanims.color_picker_rectangles[pal] #Object to clarify/set that it's not just the ID.
+        if self.createanims.current_color_picker_rectangle is not None:
+            current_rgb = color_picker_rectangle_object.color_picker_canvas.itemcget(self.createanims.current_color_picker_rectangle, "fill")
+            color_picker_rectangle_object.color_picker_canvas.itemconfig(self.createanims.current_color_picker_rectangle, outline=current_rgb)
+        color_picker_rectangle_object.color_picker_canvas.itemconfig(color_picker_rectangle_object.color_picker_rectangle, outline="blue") #Might be worth it to create a function that retrieves the selection color based on pal.
+        self.createanims.current_color_picker_rectangle = color_picker_rectangle_object.color_picker_rectangle
 
 class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the color picker.
 
