@@ -67,15 +67,23 @@ SYSTEM_PALETTE = [
 
 class PalRectangle: #I usually don't do this, but whatever. The main is TileUtils.
 
-    def __init__(self, palette_canvas, pal_rectangle, pal, pal_label):
+    def __init__(self, createanims, palette_canvas, pal_rectangle, pal, pal_label):
+        self.createanims = createanims
         self.pal_rectangle = pal_rectangle #This is actually a literal int. Pretty cool. #Alternative name pal_rectangle_id to make it clear it's a literal int/ID.
         self.pal = pal
         self.pal_label = pal_label
         self.palette_canvas = palette_canvas
         self.palette_canvas.tag_bind(self.pal_rectangle, "<Enter>", self.on_enter)
+        self.palette_canvas.tag_bind(self.pal_rectangle, "<Button-1>", self.on_left_click)
 
     def on_enter(self, event=None):
         self.pal_label.config(text=f"Palette: {self.pal:02X}")
+
+    def on_left_click(self, event=None):
+        if self.createanims.current_pal_rectangle is not None:
+            self.palette_canvas.itemconfig(self.createanims.current_pal_rectangle, outline="")
+        self.palette_canvas.itemconfig(self.pal_rectangle, outline="red")
+        self.createanims.current_pal_rectangle = self.pal_rectangle
 
 class TileUtils:
 
@@ -91,5 +99,5 @@ class TileUtils:
             r, g, b = rgb_triplet[0], rgb_triplet[1], rgb_triplet[2]
             rgb = f"#{r:02X}{g:02X}{b:02X}"
             pal_rectangle = self.createanims.character_palette_canvas.create_rectangle(initial_x, 0, initial_x + 31, 33, fill=rgb, outline=rgb, width=1)
-            self.createanims.pal_rectangles.append(PalRectangle(self.createanims.character_palette_canvas, pal_rectangle, pal, self.createanims.pal_label))
+            self.createanims.pal_rectangles.append(PalRectangle(self.createanims, self.createanims.character_palette_canvas, pal_rectangle, pal, self.createanims.pal_label))
             initial_x += 32

@@ -22,6 +22,7 @@ class CreateAnims:
         self.root = Tk()
         self.tile_utils = TileUtils(self)
         self.characters_palettes = []
+        self.current_pal_rectangle = None
 
     def init_anim_window(self):
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
