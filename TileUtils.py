@@ -65,6 +65,18 @@ SYSTEM_PALETTE = [
 	[0, 0, 0],
 ]
 
+class PalRectangle: #I usually don't do this, but whatever. The main is TileUtils.
+
+    def __init__(self, palette_canvas, pal_rectangle, pal, pal_label):
+        self.pal_rectangle = pal_rectangle #This is actually a literal int. Pretty cool. #Alternative name pal_rectangle_id to make it clear it's a literal int/ID.
+        self.pal = pal
+        self.pal_label = pal_label
+        self.palette_canvas = palette_canvas
+        self.palette_canvas.tag_bind(self.pal_rectangle, "<Enter>", self.on_enter)
+
+    def on_enter(self, event=None):
+        self.pal_label.config(text=f"Palette: {self.pal:02X}")
+
 class TileUtils:
 
     def __init__(self, createanims):
@@ -73,8 +85,11 @@ class TileUtils:
     def refresh_palette(self): #Show according to what's already stored, or, well yeah. Passing the index isn't my style. I think.
         palette = self.createanims.characters_palettes[self.createanims.current_character]
         initial_x = 0
+        self.createanims.pal_rectangles = [] #So now I'm wondering how much I need init_state? Well it's more for stuff that needs an initial value because it won't be necessarily initialized at some other points, or it may be used at multiple points the first time. It's not the case here. This is meant to run the first time the UI starts. But there's a bit of randomness to it. Sometimes I just like to add stuff there to have it all in one place.
         for pal in palette:
             rgb_triplet = SYSTEM_PALETTE[pal]
             r, g, b = rgb_triplet[0], rgb_triplet[1], rgb_triplet[2]
-            self.createanims.palette_canvas.create_rectangle(initial_x, 0, initial_x + 31, 31, fill=f"#{r:02X}{g:02X}{b:02X}", outline="#E0E0E0", width=1)
+            rgb = f"#{r:02X}{g:02X}{b:02X}"
+            pal_rectangle = self.createanims.character_palette_canvas.create_rectangle(initial_x, 0, initial_x + 31, 33, fill=rgb, outline=rgb, width=1)
+            self.createanims.pal_rectangles.append(PalRectangle(self.createanims.character_palette_canvas, pal_rectangle, pal, self.createanims.pal_label))
             initial_x += 32
