@@ -81,7 +81,8 @@ class PalRectangle: #I usually don't do this, but whatever. The main is TileUtil
 
     def on_left_click(self, event=None):
         if self.createanims.current_pal_rectangle is not None:
-            self.palette_canvas.itemconfig(self.createanims.current_pal_rectangle, outline="")
+            current_rgb = self.palette_canvas.itemcget(self.createanims.current_pal_rectangle, "fill")
+            self.palette_canvas.itemconfig(self.createanims.current_pal_rectangle, outline=current_rgb) #Outline "" doesn't really work. It leaves some borders.
         self.palette_canvas.itemconfig(self.pal_rectangle, outline="red")
         self.createanims.current_pal_rectangle = self.pal_rectangle
 
@@ -97,7 +98,8 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
 
     def on_left_click(self, event=None):
         if self.createanims.current_color_picker_rectangle is not None:
-            self.color_picker_canvas.itemconfig(self.createanims.current_color_picker_rectangle, outline="")
+            current_rgb = self.color_picker_canvas.itemcget(self.createanims.current_color_picker_rectangle, "fill")
+            self.color_picker_canvas.itemconfig(self.createanims.current_color_picker_rectangle, outline=current_rgb) #Outline "" doesn't really work. It leaves some borders. (copypasted)
         self.color_picker_canvas.itemconfig(self.color_picker_rectangle, outline="blue")
         self.createanims.current_color_picker_rectangle = self.color_picker_rectangle
 
