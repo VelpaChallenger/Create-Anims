@@ -37,7 +37,7 @@ class CreateAnims:
         frame_palette.grid(row=1, column=0, sticky="w")
         self.pal_label = tkinter.Label(frame_palette, text="Palette:", anchor="w", font=FONT)
         self.pal_label.grid(row=0, column=0, sticky="w")
-        self.character_palette_canvas = tkinter.Canvas(frame_palette, width=254, height=32, bg="#808080", cursor="hand2", borderwidth=0)
+        self.character_palette_canvas = tkinter.Canvas(frame_palette, width=256, height=32, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
         self.character_palette_canvas.grid(row=1, column=0)
 
     def refresh_UI(self): #This will be part of CreateAnims. All directly UI-related, idea is that it's here. Maybe not the technical like more specific code per se, but at least the highest layer.

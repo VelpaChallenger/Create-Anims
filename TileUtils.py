@@ -98,6 +98,6 @@ class TileUtils:
             rgb_triplet = SYSTEM_PALETTE[pal]
             r, g, b = rgb_triplet[0], rgb_triplet[1], rgb_triplet[2]
             rgb = f"#{r:02X}{g:02X}{b:02X}"
-            pal_rectangle = self.createanims.character_palette_canvas.create_rectangle(initial_x, 0, initial_x + 31, 33, fill=rgb, outline=rgb, width=1)
+            pal_rectangle = self.createanims.character_palette_canvas.create_rectangle(initial_x, 0, initial_x + 31, 31, fill=rgb, outline=rgb, width=1)
             self.createanims.pal_rectangles.append(PalRectangle(self.createanims, self.createanims.character_palette_canvas, pal_rectangle, pal, self.createanims.pal_label))
             initial_x += 32
