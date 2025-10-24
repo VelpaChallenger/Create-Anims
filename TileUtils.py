@@ -121,7 +121,6 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         pal_rectangle_object = self.createanims.pal_rectangles[self.createanims.current_pal_rectangle]
         character_palette = self.createanims.characters_palettes[self.createanims.current_character]
         character_palette[pal_rectangle_object.character_pal_index] = self.pal #Now the character palette is updated and will be picked by refresh_palette.
-        #self.createanims.tile_utils.refresh_palette() #Might be worth it to... I mean for anims, I would like to have something running every time and we just update the values and it immediately picks it up when it consumes the updated values. For this, we need to call it manually. There's nothing running every frame. There's no schedule or anything like that, but there probably will be for stuff like the anims themselves.
         pal_rectangle_object.palette_canvas.itemconfig(pal_rectangle_object.pal_rectangle, fill=self.rgb)
         self.pal_label.config(text=f"Palette: {self.pal:02X}") #Technically not the pal_rectangle itself but I mean, still logically part of the same update. Same unit.
 
