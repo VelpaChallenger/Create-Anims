@@ -33,12 +33,12 @@ class CreateAnims:
         self.root.geometry(f"{WIDTH}x{HEIGHT}+{INITIAL_X}+{INITIAL_Y}") #It's how my mind sees things. It's the initial, you might drag the window around and stuff. #Window x/y could be alternative name.
 
         frame_stage = tkinter.Frame(self.root, border=0) #Scenario also. But I like more stage. It's where the action happens.
-        frame_stage.grid(row=0, column=0, sticky="w")
+        frame_stage.grid(row=0, column=0, columnspan=2, sticky="w")
         self.stage_canvas = tkinter.Canvas(frame_stage, width=860, height=256, bg="#E0E0E0")
         self.stage_canvas.grid(row=0, column=0)
 
         frame_palette = tkinter.Frame(self.root, border=0)
-        frame_palette.grid(row=1, column=0, sticky="w")
+        frame_palette.grid(row=1, column=0, sticky="nw")
         self.pal_label = tkinter.Label(frame_palette, text="Palette:", anchor="w", font=FONT)
         self.pal_label.grid(row=0, column=0, sticky="w")
         self.character_palette_canvas = tkinter.Canvas(frame_palette, width=256, height=32, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
@@ -46,6 +46,13 @@ class CreateAnims:
         self.color_picker_canvas = tkinter.Canvas(frame_palette, width=256, height=69, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
         self.color_picker_canvas.grid(row=2, column=0, pady=30)
         self.create_color_picker()
+
+        frame_chr = tkinter.Frame(self.root, border=0)
+        frame_chr.grid(row=1, column=1, sticky="nw")
+        self.chr_label = tkinter.Label(frame_chr, text="CHR Bank:", anchor="w", font=FONT)
+        self.chr_label.grid(row=0, column=0, sticky="w")
+        self.chr_canvas = tkinter.Canvas(frame_chr, width=350, height=160, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
+        self.chr_canvas.grid(row=1, column=0)
 
         menu_bar = tkinter.Menu(self.root)
         file_menu = tkinter.Menu(menu_bar, tearoff=0)
