@@ -23,7 +23,7 @@ class CreateAnims:
         self.root = Tk()
         self.tile_utils = TileUtils(self)
         self.command = Command(self)
-        self.characters_palettes = []
+        self.characters = []
         self.current_pal_rectangle = None
         self.current_color_picker_rectangle = None
         self.palette_directory = None

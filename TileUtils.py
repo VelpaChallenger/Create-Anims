@@ -119,7 +119,7 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         if self.createanims.current_pal_rectangle is None:
             return #Nothing to do then. This logic only applies if there is a pal rectangle selected.
         pal_rectangle_object = self.createanims.pal_rectangles[self.createanims.current_pal_rectangle]
-        character_palette = self.createanims.characters_palettes[self.createanims.current_character]
+        character_palette = self.createanims.characters[self.createanims.current_character].palette
         character_palette[pal_rectangle_object.character_pal_index] = self.pal #Now the character palette is updated and will be picked by refresh_palette.
         pal_rectangle_object.palette_canvas.itemconfig(pal_rectangle_object.pal_rectangle, fill=self.rgb)
         self.pal_label.config(text=f"Palette: {self.pal:02X}") #Technically not the pal_rectangle itself but I mean, still logically part of the same update. Same unit.
@@ -130,7 +130,7 @@ class TileUtils:
         self.createanims = createanims
 
     def refresh_palette(self): #Show according to what's already stored, or, well yeah. Passing the index isn't my style. I think.
-        palette = self.createanims.characters_palettes[self.createanims.current_character] #I'm likely going to refactor this soon. Rather than characters_ for each type of data, I will have characters, and then access each character from there.
+        palette = self.createanims.characters[self.createanims.current_character].palette #I'm likely going to refactor this soon. Rather than characters_ for each type of data, I will have characters, and then access each character from there.
         initial_x = 0
         self.createanims.pal_rectangles = {} #Updated to dictionary now. Easier to pick up by pal_rectangle id. #So now I'm wondering how much I need init_state? Well it's more for stuff that needs an initial value because it won't be necessarily initialized at some other points, or it may be used at multiple points the first time. It's not the case here. This is meant to run the first time the UI starts. But there's a bit of randomness to it. Sometimes I just like to add stuff there to have it all in one place.
         for i, pal in enumerate(palette):
