@@ -172,6 +172,7 @@ class TileUtils:
             initial_x += 32
 
     def refresh_chr(self):
+        self.createanims.tiles_images = [] #Let's follow same as pal_rectangles for refresh_palette. Sometimes I use clear... this will do. Plus it won't work first time and it's already like this before so, yeah.
         chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank]
         character_chr = self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]
         self.create_chr_images(chr_palette, character_chr)
