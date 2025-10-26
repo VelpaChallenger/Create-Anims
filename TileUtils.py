@@ -116,6 +116,7 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         self.color_picker_canvas.itemconfig(self.color_picker_rectangle, outline="blue")
         self.createanims.current_color_picker_rectangle = self.color_picker_rectangle
         self.update_pal_rectangle()
+        self.createanims.tile_utils.refresh_chr()
 
     def update_pal_rectangle(self):
         if self.createanims.current_pal_rectangle is None:
@@ -172,6 +173,7 @@ class TileUtils:
             initial_x += 32
 
     def refresh_chr(self):
+        self.createanims.chr_canvas.delete("all") #Nah changed my mind but still leaving it here. #I could import it at the top but it gives wrong idea. It's not really something that TileUtils uses like images. It's... for a variable. We could in fact just pass the string and whatever. It's not the same as saying "we can just copypaste the code". It's not the same thing.
         self.createanims.tiles_images = [] #Let's follow same as pal_rectangles for refresh_palette. Sometimes I use clear... this will do. Plus it won't work first time and it's already like this before so, yeah.
         chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank]
         character_chr = self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]
