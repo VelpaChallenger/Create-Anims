@@ -139,6 +139,7 @@ class TileImage:
         self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
         self.chr_canvas.tag_bind(self.tile_image, "<Enter>", self.on_enter)
         self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", self.on_left_click)
+        self.chr_canvas.tag_bind(self.tile_image, "<Double-Button-1>", self.on_double_left_click)
 
     def on_enter(self, event=None):
         self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")
@@ -153,6 +154,31 @@ class TileImage:
             self.chr_canvas.moveto(self.createanims.current_tile_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
             self.chr_canvas.moveto(self.createanims.current_tile_image_inner_rectangle, x, y)
             self.chr_canvas.moveto(self.createanims.current_tile_image_outer_rectangle, x-2, y-2)
+
+    def on_double_left_click(self, event=None):
+        initial_x, initial_y = self.chr_canvas.coords(self.tile_image) #We could also cache this but uh, yeah. Let's get them here before we delete the image (also yeah, if I stored it, I would have to update it with every move... not fun).
+        self.chr_canvas.delete(self.tile_image)
+        self.chr_canvas.delete(self.createanims.current_tile_image_rectangle)
+        chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank] #It has a bit of everything from refresh_chr. But has to be different because on the one hand, I only want just one image updated. And on the other, it'd just get messy to have everything under the same function.
+        tile_palette_row = self.tile_index // 8 #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
+        tile_palette_row_tile = self.tile_index % 8
+        chr_palette[tile_palette_row] ^= 1 << tile_palette_row_tile #Here's the gist of it, the magic. #The opposite. Also, yes, it seems like a lot of trouble for just one not but the alternative is to catch (cache) it or something which... meh.
+        character_chr = self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]
+        pixels = self.createanims.tile_utils.get_pixels(self.tile_index, character_chr)
+        img = Image.frombytes("P", (8, 8), bytes(pixels))
+        tile_palette_group, tile_palette = self.createanims.tile_utils.get_tile_palette(self.tile_index, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
+        img.putpalette(tile_palette) #Though, it'll always be the rgb of the group 0 or 1 palette so, in a way, it could be called even pal_rectangle.
+        final_img = ImageTk.PhotoImage(img.resize((16, 16)))
+        self.tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
+        self.final_img = final_img #And again, we need to keep the reference.
+        self.chr_canvas.tag_bind(self.tile_image, "<Enter>", self.on_enter) #Maybe... it would be better to just create a new TileImage altogether.
+        self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", self.on_left_click)
+        self.chr_canvas.tag_bind(self.tile_image, "<Double-Button-1>", self.on_double_left_click)
+        x, y = initial_x, initial_y
+        self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black")
+        self.tile_palette_group = tile_palette_group
 
 class TileUtils:
 
