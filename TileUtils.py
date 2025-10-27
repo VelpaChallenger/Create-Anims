@@ -117,7 +117,7 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         self.createanims.current_color_picker_rectangle = self.color_picker_rectangle
         self.update_pal_rectangle()
         self.createanims.tile_utils.refresh_chr()
-        self.delete_tile_image_rectangles() #The just in case goes more for the deletion in chr_canvas, but the current selection must be updated to None otherwise we get bug where rectangles are not drawn on screen anymore. Probably images overlap them? Or something of the sort. #Just in case. Let us avoid a memory leak, performance issues and stuff like that.
+        self.createanims.tile_utils.delete_tile_image_rectangles() #The just in case goes more for the deletion in chr_canvas, but the current selection must be updated to None otherwise we get bug where rectangles are not drawn on screen anymore. Probably images overlap them? Or something of the sort. #Just in case. Let us avoid a memory leak, performance issues and stuff like that.
 
     def update_pal_rectangle(self):
         if self.createanims.current_pal_rectangle is None:
@@ -127,14 +127,6 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         character_palette[pal_rectangle_object.character_pal_index] = self.pal #Now the character palette is updated and will be picked by refresh_palette.
         pal_rectangle_object.palette_canvas.itemconfig(pal_rectangle_object.pal_rectangle, fill=self.rgb)
         self.pal_label.config(text=f"Palette: {self.pal:02X}") #Technically not the pal_rectangle itself but I mean, still logically part of the same update. Same unit.
-
-    def delete_tile_image_rectangles(self):
-        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_rectangle)
-        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_inner_rectangle)
-        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_outer_rectangle)
-        self.createanims.current_tile_image_rectangle = None
-        self.createanims.current_tile_image_inner_rectangle = None
-        self.createanims.current_tile_image_outer_rectangle = None
 
 class TileImage:
 
@@ -166,8 +158,7 @@ class TileImage:
 
     def on_double_left_click(self, event=None):
         initial_x, initial_y = self.chr_canvas.coords(self.tile_image) #We could also cache this but uh, yeah. Let's get them here before we delete the image (also yeah, if I stored it, I would have to update it with every move... not fun).
-        self.chr_canvas.delete(self.tile_image)
-        self.chr_canvas.delete(self.createanims.current_tile_image_rectangle)
+        self.createanims.tile_utils.delete_tile_image_rectangles()
         chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank] #It has a bit of everything from refresh_chr. But has to be different because on the one hand, I only want just one image updated. And on the other, it'd just get messy to have everything under the same function.
         tile_palette_row = self.tile_index // 8 #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
         tile_palette_row_tile = self.tile_index % 8
@@ -268,3 +259,11 @@ class TileUtils:
             rgb_triplet = SYSTEM_PALETTE[pal]
             tile_palette.extend(rgb_triplet) #putpalette doesn't accept triplets it would seem, has to be all values as a sequence.
         return int(bool(tile_palette_group)), tile_palette #Could be int(bool(tile_palette_group)), maybe to be more explicit but... either works. Actually yes, I'll just add it to make it explicit for me.
+
+    def delete_tile_image_rectangles(self): #I will need this for several sources. A restart that for now can come from ColorPickerRectangle or TileImage, but it may come also from Anim and potentially other places.
+        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_rectangle)
+        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_inner_rectangle)
+        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_outer_rectangle)
+        self.createanims.current_tile_image_rectangle = None
+        self.createanims.current_tile_image_inner_rectangle = None
+        self.createanims.current_tile_image_outer_rectangle = None
