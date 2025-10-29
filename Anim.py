@@ -1,5 +1,8 @@
 from PIL import ImageTk
 
+INITIAL_X_FRAME = 50 #To know from where to start col by col, row by row. The cells.
+INITIAL_Y_FRAME = 36
+
 class Frame:
     
     def __init__(self, frame_bytes):
@@ -33,14 +36,16 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def __init__(self, createanims):
         self.createanims = createanims
         self.transparency = 1 #Default value. #Yes, let's leave this as part of Anim. It will still be accessible from CreateAnims, Command etc. etc.
+        self.draw_frame_rectangle = 1 #I know I know. I'm mixing Frame and Anim quite a lot. Oh well. We'll survive. I think.
+        self.frame_rectangle = None #No ID, will be created later if option is turned on.
 
     def refresh(self):
-        initial_y = 20
+        initial_y = INITIAL_Y_FRAME - 16
         self.createanims.anim_images = []
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame]
         cell_id = 0 #Let's call it this way, probably the most accurate. tile_id could be confused with the tile_id stored in the cell, frame_tile_id would be another candidate to refer to the tile_id stored in the frame, but mixing frame and tile can be a bit confusing as with row and tile in the same name (I did it for TileUtils).
         for row in range(frame.metadata.y_length):
-            initial_x = 50
+            initial_x = INITIAL_X_FRAME
             initial_y += 16
             for col in range(frame.metadata.x_length):
                 tile_id = frame.tiles[cell_id]
@@ -53,6 +58,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     self.createanims.anim_images.append(AnimImage(self.createanims, self.createanims.anim_canvas, anim_image, cell_id, tile_image.tile_palette_group, self.createanims.tile_label, pre_tkimg, final_img))
                 initial_x += 16
                 cell_id += 1
+        if self.frame_rectangle is not None:
+            self.createanims.anim_canvas.delete(self.frame_rectangle)
+        if self.draw_frame_rectangle:
+            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME, INITIAL_Y_FRAME, INITIAL_X_FRAME + 16*frame.metadata.x_length, INITIAL_Y_FRAME + 16*frame.metadata.y_length, outline="red", width=2)
 
     def decide_transparency_anim_image(self, pre_tkimg, transparency):
         if transparency: #Updated logic. #One of those cases where I prefer == 0 rather than using not.

@@ -71,6 +71,8 @@ class CreateAnims:
         anim_menu = tkinter.Menu(menu_bar, tearoff=0)
         anim_menu.add_command(label="Toggle transparency", command=self.command.toggle_anim_transparency, accelerator="Shift+T") #We'll add a little 'anim' in the name for me. Yay.
         self.root.bind("<Shift-T>", self.command.toggle_anim_transparency)
+        anim_menu.add_command(label="Toggle rectangle around frame", command=self.command.toggle_draw_frame_rectangle, accelerator="r") #We'll add a little 'anim' in the name for me. Yay.
+        self.root.bind("r", self.command.toggle_draw_frame_rectangle)
         menu_bar.add_cascade(label="Anim", menu=anim_menu)
         self.root.config(menu=menu_bar)
 

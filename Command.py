@@ -43,3 +43,7 @@ class Command:
     def toggle_anim_transparency(self, event=None): #When it's called from keyboard shortcut, event is sent. So we need event=None, we won't use it anyways.
         self.createanims.anim.transparency ^= 1 #Let's make it a literal toggle.
         self.createanims.anim.refresh() #But, as usual, a refresh also.
+
+    def toggle_draw_frame_rectangle(self, event=None): #When it's called from keyboard shortcut, event is sent. So we need event=None, we won't use it anyways.
+        self.createanims.anim.draw_frame_rectangle ^= 1 #Let's make it a literal toggle.
+        self.createanims.anim.refresh() #But, as usual, a refresh also.
