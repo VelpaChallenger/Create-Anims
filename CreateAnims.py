@@ -68,6 +68,10 @@ class CreateAnims:
         file_menu.add_command(label="Save palette", command=self.command.save_palette)
         file_menu.add_command(label="Save CHR palette", command=self.command.save_chr_palette)
         menu_bar.add_cascade(label="File", menu=file_menu)
+        anim_menu = tkinter.Menu(menu_bar, tearoff=0)
+        anim_menu.add_command(label="Toggle transparency", command=self.command.toggle_anim_transparency, accelerator="Shift+T") #We'll add a little 'anim' in the name for me. Yay.
+        self.root.bind("<Shift-T>", self.command.toggle_anim_transparency)
+        menu_bar.add_cascade(label="Anim", menu=anim_menu)
         self.root.config(menu=menu_bar)
 
     def create_color_picker(self): #Its own function 'cause, it does have some complexity. #Also, it could be in TileUtils but... it's initialization still. So I'll go this route.

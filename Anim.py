@@ -32,6 +32,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def __init__(self, createanims):
         self.createanims = createanims
+        self.transparency = 1 #Default value. #Yes, let's leave this as part of Anim. It will still be accessible from CreateAnims, Command etc. etc.
 
     def refresh(self):
         initial_y = 20
@@ -46,9 +47,15 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 if tile_id != 0xFF: #So 0x7F is still a valid tile. So, we need to do it before & 0x7F.
                     tile_image = self.createanims.tiles_images[tile_id & 0x7F] #Let's move it here to have cleaner checks. #We only care about bits 0-6. Actually I think I was going to run a script to fix that for all frames. But meanwhile we can do this. The idea is to remove the and #$7F in the code, I think it's still there for now.
                     pre_tkimg = tile_image.pre_tkimg
-                    pre_tkimg.info['transparency'] = 0
+                    self.decide_transparency_anim_image(pre_tkimg, self.transparency)
                     final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, 16))) #So yes, actually different images with same base, but still different.
-                    anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
+                    anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img) #WARNING! Potential memory issue here. I'm never deleting this anim_image with each refresh. Not a problem after doing many many tests but... it does make me curious that it seemed to be a problem with the CHR canvas. Or maybe that one was getting slower for different reasons. Could be. Still taking note of that here in case it comes handy later.
                     self.createanims.anim_images.append(AnimImage(self.createanims, self.createanims.anim_canvas, anim_image, cell_id, tile_image.tile_palette_group, self.createanims.tile_label, pre_tkimg, final_img))
                 initial_x += 16
                 cell_id += 1
+
+    def decide_transparency_anim_image(self, pre_tkimg, transparency):
+        if transparency: #Updated logic. #One of those cases where I prefer == 0 rather than using not.
+            pre_tkimg.info['transparency'] = 0
+        else: #Yeah now it should be 1, it's a toggle. #Should be None, but I'll interpret any other value the same way. Seems cleaner than elif and then else or just leaving the elif or showing some msg...
+            pre_tkimg.info.pop('transparency', None) #No errors if the key doesn't exist.

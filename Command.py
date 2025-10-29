@@ -39,3 +39,7 @@ class Command:
         self.createanims.chr_palette_directory = os.path.dirname(chr_pal_filename) #Directory where the file selected is.
         with open(chr_pal_filename, "wb") as chr_pal_file:
             chr_pal_file.write(bytearray(self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank]))
+
+    def toggle_anim_transparency(self, event=None): #When it's called from keyboard shortcut, event is sent. So we need event=None, we won't use it anyways.
+        self.createanims.anim.transparency ^= 1 #Let's make it a literal toggle.
+        self.createanims.anim.refresh() #But, as usual, a refresh also.
