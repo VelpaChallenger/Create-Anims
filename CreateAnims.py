@@ -5,6 +5,7 @@ from tkinter import Tk
 
 from TileUtils import *
 from Command import *
+from Anim import *
 
 FONT = ("TkDefaultFont", 16)
 
@@ -23,10 +24,12 @@ class CreateAnims:
         self.root = Tk()
         self.tile_utils = TileUtils(self)
         self.command = Command(self)
+        self.anim = Anim(self)
         self.characters = []
         self.current_pal_rectangle = None
         self.current_color_picker_rectangle = None
         self.current_tile_image_rectangle = None
+        self.current_frame = None
         self.palette_directory = None
         self.chr_palette_directory = None
 
@@ -38,6 +41,8 @@ class CreateAnims:
         frame_stage.grid(row=0, column=0, columnspan=2, sticky="w")
         self.stage_canvas = tkinter.Canvas(frame_stage, width=860, height=256, bg="#E0E0E0")
         self.stage_canvas.grid(row=0, column=0)
+        self.anim_canvas = tkinter.Canvas(frame_stage, width=200, height=256)
+        self.anim_canvas.grid(row=0, column=0)
 
         frame_palette = tkinter.Frame(self.root, border=0)
         frame_palette.grid(row=1, column=0, sticky="nw")
@@ -85,3 +90,4 @@ class CreateAnims:
     def refresh_UI(self): #This will be part of CreateAnims. All directly UI-related, idea is that it's here. Maybe not the technical like more specific code per se, but at least the highest layer.
         self.tile_utils.refresh_palette() #Changed my mind, will be part of a refresh/update UI.
         self.tile_utils.refresh_chr()
+        self.anim.refresh()
