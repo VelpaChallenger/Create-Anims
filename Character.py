@@ -7,11 +7,12 @@ CHARACTER_FRAMES_FILEPATH = "sub_zero_frame_01.frame"
 
 class Character:
 
-    def __init__(self, character_name):
+    def __init__(self, createanims, character_name):
+        self.createanims = createanims
         self.palette = self.get_palette("subzero")
         chr_ids = [0x9C] #When I add more characters, there'll be more and they'll be obtained after we parse the anim file.
         self.chr_palettes, self.chrs = self.get_chrs_and_palettes(character_name, chr_ids) #Whatever, the and makes it clear. Any other name to include both just doesn't make it clear.
-        self.frames = self.get_frames(character_name, [0x00, 0x01])
+        self.frames = self.get_frames(character_name, [0x00, 0x01, 0x02, 0x03, 0x04, 0x05])
         #self.chr_palettes = {}
         #self.chr_palette = self.get_chr_palette("subzero")
         #self.chr_palettes
@@ -53,6 +54,6 @@ class Character:
         return frames
 
     def get_frame(self, name, frame_id):
-        with open(CHARACTER_FRAMES_FILEPATH, "rb") as character_frame:
+        with open(f"{self.createanims.root_dir}/{name}/frames/{name}_frame_{frame_id:02d}.frame", "rb") as character_frame:
             frame = Frame(list(character_frame.read()))
         return frame
