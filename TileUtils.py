@@ -119,6 +119,7 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         self.createanims.tile_utils.refresh_chr()
         if self.createanims.current_tile_image_rectangle is not None: #Typical fix.
             self.createanims.tile_utils.delete_tile_image_rectangles() #The just in case goes more for the deletion in chr_canvas, but the current selection must be updated to None otherwise we get bug where rectangles are not drawn on screen anymore. Probably images overlap them? Or something of the sort. #Just in case. Let us avoid a memory leak, performance issues and stuff like that.
+        self.createanims.anim.refresh()
 
     def update_pal_rectangle(self):
         if self.createanims.current_pal_rectangle is None:
@@ -173,6 +174,7 @@ class TileImage:
         img = Image.frombytes("P", (8, 8), bytes(pixels))
         tile_palette_group, tile_palette = self.createanims.tile_utils.get_tile_palette(self.tile_index, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
         img.putpalette(tile_palette) #Though, it'll always be the rgb of the group 0 or 1 palette so, in a way, it could be called even pal_rectangle.
+        self.pre_tkimg = img
         final_img = ImageTk.PhotoImage(img.resize((16, 16)))
         self.tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
         self.final_img = final_img #And again, we need to keep the reference.
@@ -186,6 +188,7 @@ class TileImage:
         self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
         self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black")
         self.tile_palette_group = tile_palette_group
+        self.createanims.anim.refresh()
 
     def on_right_click_motion(self, event): #Not None anymore cause now I'm gonna use it.
         if not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
