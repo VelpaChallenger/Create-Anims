@@ -74,6 +74,8 @@ class CreateAnims:
         self.root.bind("<Shift-T>", self.command.toggle_anim_transparency)
         anim_menu.add_command(label="Toggle rectangle around frame", command=self.command.toggle_draw_frame_rectangle, accelerator="r") #We'll add a little 'anim' in the name for me. Yay.
         self.root.bind("r", self.command.toggle_draw_frame_rectangle)
+        anim_menu.add_command(label="Toggle draw empty cells", command=self.command.toggle_draw_empty_cells, accelerator="e") #We'll add a little 'anim' in the name for me. Yay.
+        self.root.bind("e", self.command.toggle_draw_empty_cells)
         menu_bar.add_cascade(label="Anim", menu=anim_menu)
         self.root.config(menu=menu_bar)
 

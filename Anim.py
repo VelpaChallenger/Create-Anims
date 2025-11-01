@@ -1,4 +1,4 @@
-from PIL import ImageTk
+from PIL import Image, ImageTk
 
 INITIAL_X_FRAME = 50 #To know from where to start col by col, row by row. The cells.
 INITIAL_Y_FRAME = 36
@@ -49,6 +49,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims = createanims
         self.transparency = 1 #Default value. #Yes, let's leave this as part of Anim. It will still be accessible from CreateAnims, Command etc. etc.
         self.draw_frame_rectangle = 1 #I know I know. I'm mixing Frame and Anim quite a lot. Oh well. We'll survive. I think.
+        self.draw_empty_cells = 1
         self.frame_rectangle = None #No ID, will be created later if option is turned on.
 
     def refresh(self):
@@ -71,6 +72,18 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, 16))) #So yes, actually different images with same base, but still different.
                     anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img) #WARNING! Potential memory issue here. I'm never deleting this anim_image with each refresh. Not a problem after doing many many tests but... it does make me curious that it seemed to be a problem with the CHR canvas. Or maybe that one was getting slower for different reasons. Could be. Still taking note of that here in case it comes handy later.
                     self.createanims.anim_images.append(AnimImage(self.createanims, self.createanims.anim_canvas, anim_image, cell_id, tile_image.tile_palette_group, self.createanims.tile_label, pre_tkimg, final_img))
+                else: #We will draw something, but not an image. A rectangle. A blue rectangle.
+                    pixels = [0x00] * 64 #Fully transparent. This works as a fill.
+                    img = Image.frombytes("P", (8, 8), bytes(pixels))
+                    tile_palette = [0x00] * 12 #Like, just whatever. We won't use them.
+                    img.putpalette(tile_palette)
+                    pre_tkimg = img
+                    img.info['transparency'] = 0 #Always transparent in this case, nothing to decide.
+                    final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, 16)))
+                    anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
+                    if self.draw_empty_cells:
+                        anim_empty_rectangle = self.createanims.anim_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + 15, width=1, outline="blue") #Alt name anim_empty_image, but I like more rectangle because, even though it's taking the place of what could be an image, it is a rectangle.
+                    self.createanims.anim_images.append(AnimImage(self.createanims, self.createanims.anim_canvas, anim_image, cell_id, None, self.createanims.tile_label, pre_tkimg, final_img)) #We could also create an empty image but... I think I prefer the rectangle idea. Let's see how it goes.
                 initial_x += 16
                 cell_id += 1
         if self.frame_rectangle is not None:
