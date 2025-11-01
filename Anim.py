@@ -41,6 +41,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.select()
         if self.tile_image_object is not None: #It could be the empty one, in which case, don't do anything, just select in Anim.
             self.tile_image_object.select()
+            self.tile_image_object.update_tile_label()
 
     def select(self):
         x, y = self.anim_canvas.coords(self.anim_image)

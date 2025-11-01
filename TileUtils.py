@@ -147,7 +147,7 @@ class TileImage:
         self.in_motion = False
 
     def on_enter(self, event=None):
-        self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")
+        self.update_tile_label() #I could also say refresh but refresh gives me more the idea of like, what I do for CHR and anim. It's not exactly that here.
 
     def on_left_click(self, event=None):
         self.select()
@@ -214,6 +214,9 @@ class TileImage:
             self.chr_canvas.moveto(self.createanims.current_tile_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
             self.chr_canvas.moveto(self.createanims.current_tile_image_inner_rectangle, x, y)
             self.chr_canvas.moveto(self.createanims.current_tile_image_outer_rectangle, x-2, y-2)
+
+    def update_tile_label(self): #I feel more comfortable calling this method from other components rather than on_enter. It will also make it easier if on_enter has to make something additional but from other places it should still be just the label. Very experimental anyways, might change in the future. I already call on_double_click from motion so... yeah.
+        self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")
 
 class TileUtils:
 
