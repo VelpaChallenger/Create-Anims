@@ -40,6 +40,26 @@ class Command:
         with open(chr_pal_filename, "wb") as chr_pal_file:
             chr_pal_file.write(bytearray(self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank]))
 
+    def save_frame(self):
+        initial_directory = self.createanims.frames_directory
+        if initial_directory is None:
+            initial_directory = os.getcwd()
+        frame_filename = filedialog.asksaveasfilename(
+            defaultextension=".frame",
+            filetypes=[("Frame files", ".frame"), ("All files", "*.*")],
+            initialdir=initial_directory,
+            title="Save frame",
+            parent=self.createanims.root
+        )
+        if not frame_filename: #Then save was aborted.
+            return
+        self.createanims.frames_directory = os.path.dirname(frame_filename) #Directory where the file selected is.
+        with open(frame_filename, "wb") as frame_file:
+            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame]
+            metadata = frame.metadata
+            frame_file.write(bytearray([metadata.x_length, metadata.y_length, metadata.x_offset, metadata.chr_bank, metadata.y_offset, 0x0])) #Metadata first.
+            frame_file.write(bytearray(frame.tiles)) #And now the tiles.
+
     def toggle_anim_transparency(self, event=None): #When it's called from keyboard shortcut, event is sent. So we need event=None, we won't use it anyways.
         self.createanims.anim.transparency ^= 1 #Let's make it a literal toggle.
         self.createanims.anim.refresh() #But, as usual, a refresh also.

@@ -34,6 +34,7 @@ class CreateAnims:
         self.current_frame = None
         self.palette_directory = None
         self.chr_palette_directory = None
+        self.frames_directory = None
 
     def init_anim_window(self):
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
@@ -69,6 +70,7 @@ class CreateAnims:
         file_menu = tkinter.Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="Save palette", command=self.command.save_palette)
         file_menu.add_command(label="Save CHR palette", command=self.command.save_chr_palette)
+        file_menu.add_command(labe="Save frame", command=self.command.save_frame)
         menu_bar.add_cascade(label="File", menu=file_menu)
         anim_menu = tkinter.Menu(menu_bar, tearoff=0)
         anim_menu.add_command(label="Toggle transparency", command=self.command.toggle_anim_transparency, accelerator="Shift+T") #We'll add a little 'anim' in the name for me. Yay.
