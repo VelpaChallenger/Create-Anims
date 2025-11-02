@@ -33,6 +33,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
         self.anim_canvas.tag_bind(self.anim_image, "<Button-1>", self.on_left_click)
         self.anim_canvas.tag_bind(self.anim_image, "<Button-3>", self.on_right_click)
+        self.anim_canvas.tag_bind(self.anim_image, "<Double-Button-3>", self.on_double_right_click)
 
     def on_left_click(self, event=None):
         self.select()
@@ -46,6 +47,11 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         if self.tile_image_object is not None: #It could be the empty one, in which case, don't do anything, just select in Anim.
             self.tile_image_object.select()
             self.tile_image_object.update_tile_label()
+
+    def on_double_right_click(self, event=None):
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame]
+        frame.tiles[self.anim_index] = 0xFF
+        self.createanims.anim.refresh()
 
     def select(self):
         x, y = self.anim_canvas.coords(self.anim_image)
