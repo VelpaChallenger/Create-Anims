@@ -43,9 +43,9 @@ class CreateAnims:
 
         frame_stage = tkinter.Frame(self.root, border=0) #Scenario also. But I like more stage. It's where the action happens.
         frame_stage.grid(row=0, column=0, columnspan=2, sticky="w")
-        self.stage_canvas = tkinter.Canvas(frame_stage, width=860, height=256, bg="#E0E0E0")
+        self.stage_canvas = tkinter.Canvas(frame_stage, width=860, height=256, bg="#E0E0E0", borderwidth=0, highlightthickness=0)
         self.stage_canvas.grid(row=0, column=0)
-        self.anim_canvas = tkinter.Canvas(frame_stage, width=200, height=256, cursor="hand2")
+        self.anim_canvas = tkinter.Canvas(frame_stage, width=200, height=256, cursor="hand2", borderwidth=0, highlightthickness=0)
         self.anim_canvas.grid(row=0, column=0)
 
         frame_palette = tkinter.Frame(self.root, border=0)
