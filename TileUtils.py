@@ -378,7 +378,7 @@ class TileUtils:
         self.createanims.chr_info_text.configure(text="")
         return True
 
-    def load_new_chr_bank(self, new_chr_bank): #Could be get_new_chr_bank, but this time I feel more vibes towards load_new_chr_bank.
+    def load_new_chr_bank(self, new_chr_bank, refresh_UI_flag=True): #Could be get_new_chr_bank, but this time I feel more vibes towards load_new_chr_bank.
         self.createanims.chr_entry.configure(highlightcolor="white", highlightbackground="white") #We'll leave this here. If it was red, now it shouldn't be anymore since this 'gets it back on the right track'.
         self.createanims.chr_info_text.configure(text="")
         self.createanims.current_chr_bank = new_chr_bank
@@ -392,7 +392,8 @@ class TileUtils:
             character.chrs[new_chr_bank] = [0x00] * 0x800 #empty_chr, removed variable. #Default_chr is an alternative name. All pixels will use 00. So, color black (by default color used for transparency).
             character.chr_palettes[new_chr_bank] = [0x00] * 0x10 #If no CHR, we assume no chr palette either. It should be that way. Right?
         self.decide_chr_arrow_buttons_status()
-        self.createanims.refresh_UI()
+        if refresh_UI_flag: #This way I can call the function from frame_id update, but without doing a double UI refresh. Which I wonder how it looks like? Just checked, not much of a difference. But yeah :) .
+            self.createanims.refresh_UI()
 
     def decide_chr_arrow_buttons_status(self):
         if self.createanims.current_chr_bank == 0:

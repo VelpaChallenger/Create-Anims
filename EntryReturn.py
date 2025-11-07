@@ -23,4 +23,9 @@ class EntryReturn:
         pass
 
     def frame_id_entry(self, event=None):
-        pass
+        frame_id_entry_value = self.createanims.frame_id_entry.get()
+        if not frame_id_entry_value:
+            self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        new_frame_id = int(frame_id_entry_value)
+        self.createanims.anim.load_new_frame_id(new_frame_id)

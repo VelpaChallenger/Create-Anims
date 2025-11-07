@@ -31,6 +31,12 @@ class FrameMetaData: #To make it clear that it's not the frame itself.
         self.y_offset = (frame_bytes[4] & 0xF) * (-1 if (frame_bytes[4] & 0x10) else 1) #I don't usually use ternary in Python but here it is pretty convenient.
         self.special_palette_id = 0 #Unused, but we may give it an use later on.
 
+class CharacterAnim: #Yeah I know. Maybe it was better to say AnimUtils from the beginning. Meh. This works.
+
+    def __init__(self, anim_bytes):
+        self.physics_id = anim_bytes[0]
+        self.frame_ids = anim_bytes[1:] #Similar logic to Frame. We split it so that it's easier to handle and name. Nothing else.
+
 class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure it would be technically impossible or just too messy to have these images be exactly the same as TileImages. But either way, we do need them to be different so that the same actions like clicking and stuff make different things.
 
     def __init__(self, createanims, anim_canvas, tile_image_object, anim_image, anim_index, tile_palette_group, tile_label, pre_tkimg, final_img):
@@ -152,4 +158,44 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         return True
 
     def validate_frame_id_entry(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
+            return True
+        try: #Validation 1: value must be an integer, 0 or positive.
+            int(new_value)
+        except ValueError:
+            self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        character = self.createanims.characters[self.createanims.current_character]
+        if int(new_value) > len(character.frames) - 1: #Validation 2: value must not be greater than the maximum amount of frames for the current character.
+            self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
+
+    def load_new_frame_id(self, new_frame_id):
+        self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.current_frame_id = new_frame_id
+        self.createanims.frame_id_entry.delete(0, "end")
+        self.createanims.frame_id_entry.insert(0, str(new_frame_id))
+        character = self.createanims.characters[self.createanims.current_character]
+        character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame] = new_frame_id
+        self.createanims.current_frame_id = new_frame_id
+        frame = character.frames[new_frame_id]
+        #self.createanims.current_chr_bank = frame.metadata.chr_bank
+        self.createanims.tile_utils.load_new_chr_bank(frame.metadata.chr_bank, refresh_UI_flag=False)
+        self.decide_arrow_buttons_status(new_frame_id, len(character.frames) - 1, self.createanims.frame_id_left_arrow, self.createanims.frame_id_right_arrow)
+        self.createanims.refresh_UI()
+
+    def decide_arrow_buttons_status(self, new_value, upper_boundary, left_arrow, right_arrow): #I was a bit hesitant to create two or rather to think of making two but... makes more sense. They are conceptually different. #Also yes let's make it more generic in this case.
+        if new_value == 0:
+            left_arrow.configure(state="disabled")
+        else:
+            left_arrow.configure(state="normal")
+        if new_value == upper_boundary:
+            right_arrow.configure(state="disabled")
+        else:
+            right_arrow.configure(state="normal")
