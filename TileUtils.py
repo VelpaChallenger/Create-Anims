@@ -377,3 +377,29 @@ class TileUtils:
         self.createanims.chr_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.chr_info_text.configure(text="")
         return True
+
+    def load_new_chr_bank(self, new_chr_bank): #Could be get_new_chr_bank, but this time I feel more vibes towards load_new_chr_bank.
+        self.createanims.chr_entry.configure(highlightcolor="white", highlightbackground="white") #We'll leave this here. If it was red, now it shouldn't be anymore since this 'gets it back on the right track'.
+        self.createanims.chr_info_text.configure(text="")
+        self.createanims.current_chr_bank = new_chr_bank
+        self.createanims.chr_entry.delete(0, "end")
+        self.createanims.chr_entry.insert(0, str(new_chr_bank))
+        character = self.createanims.characters[self.createanims.current_character]
+        character.frames[self.createanims.current_frame].metadata.chr_bank = new_chr_bank
+        character_chr = character.chrs.get(new_chr_bank, None)
+        if character_chr is None:
+            self.createanims.chr_info_text.configure(text="Empty for current character. Please make sure the CHR Bank really is empty in the ROM and not used by another character or for other purposes like stages.", fg="blue") #Blue so that you do see it.
+            character.chrs[new_chr_bank] = [0x00] * 0x800 #empty_chr, removed variable. #Default_chr is an alternative name. All pixels will use 00. So, color black (by default color used for transparency).
+            character.chr_palettes[new_chr_bank] = [0x00] * 0x10 #If no CHR, we assume no chr palette either. It should be that way. Right?
+        self.decide_chr_arrow_buttons_status()
+        self.createanims.refresh_UI()
+
+    def decide_chr_arrow_buttons_status(self):
+        if self.createanims.current_chr_bank == 0:
+            self.createanims.chr_left_arrow.configure(state="disabled")
+        else:
+            self.createanims.chr_left_arrow.configure(state="normal")
+        if self.createanims.current_chr_bank == 254:
+            self.createanims.chr_right_arrow.configure(state="disabled")
+        else:
+            self.createanims.chr_right_arrow.configure(state="normal")

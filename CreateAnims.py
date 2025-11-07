@@ -2,11 +2,13 @@
 
 import tkinter
 from tkinter import Tk
+from tkinter import ttk
 
 from TileUtils import *
 from Command import *
 from EntryReturn import *
 from Anim import *
+from CreateAnimsButton import *
 
 FONT = ("TkDefaultFont", 16)
 
@@ -27,6 +29,7 @@ class CreateAnims:
         self.command = Command(self)
         self.entry_return = EntryReturn(self)
         self.anim = Anim(self)
+        self.button = CreateAnimsButton(self)
         self.characters = []
         self.current_pal_rectangle = None
         self.current_color_picker_rectangle = None
@@ -42,6 +45,7 @@ class CreateAnims:
     def init_anim_window(self):
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
         self.root.geometry(f"{WIDTH}x{HEIGHT}+{INITIAL_X}+{INITIAL_Y}") #It's how my mind sees things. It's the initial, you might drag the window around and stuff. #Window x/y could be alternative name.
+        self.make_styles()
 
         frame_stage = tkinter.Frame(self.root, border=0) #Scenario also. But I like more stage. It's where the action happens.
         frame_stage.grid(row=0, column=0, columnspan=3, sticky="w")
@@ -70,6 +74,10 @@ class CreateAnims:
         self.chr_entry = tkinter.Entry(frame_chr_bank, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
         self.chr_entry.bind("<Return>", self.entry_return.chr_entry)
         self.chr_entry.pack(side="left")
+        self.chr_left_arrow = ttk.Button(frame_chr_bank, text="", style="Left.TButton", command=self.button.chr_left_arrow_button)
+        self.chr_left_arrow.pack(side="left", padx=(5, 2))
+        self.chr_right_arrow = ttk.Button(frame_chr_bank, text="", style="Right.TButton", command=self.button.chr_right_arrow_button)
+        self.chr_right_arrow.pack(side="left")
         self.chr_canvas = tkinter.Canvas(frame_chr, width=256, height=128, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
         self.chr_canvas.grid(row=1, column=0)
         self.tile_label = tkinter.Label(frame_chr, text="Tile: 00 / 00", anchor="w", font=FONT)
@@ -102,6 +110,23 @@ class CreateAnims:
         self.root.config(menu=menu_bar)
 
         self.root.bind_all("<Button-1>", lambda event: event.widget.focus_set())
+
+    def make_styles(self):
+        style = ttk.Style()
+        style.layout(
+            "Left.TButton", [
+                ("Button.leftarrow", None),
+                ("Button.label", None)
+            ]
+        )
+        style.layout(
+            "Right.TButton", [
+                ("Button.rightarrow", None),
+                ("Button.label", None)
+            ]
+        )
+        style.configure("Left.TButton", font=('', '20'), width=2)
+        style.configure("Right.TButton", font=('', '20'), width=2)
 
     def create_color_picker(self): #Its own function 'cause, it does have some complexity. #Also, it could be in TileUtils but... it's initialization still. So I'll go this route.
         from TileUtils import SYSTEM_PALETTE, ColorPickerRectangle #Let's borrow it for a bit.
