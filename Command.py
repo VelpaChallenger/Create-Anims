@@ -57,7 +57,7 @@ class Command:
             return
         self.createanims.frames_directory = os.path.dirname(frame_filename) #Directory where the file selected is.
         with open(frame_filename, "wb") as frame_file:
-            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame]
+            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
             metadata = frame.metadata
             frame_file.write(bytearray([metadata.x_length, metadata.y_length, metadata.x_offset, metadata.chr_bank, metadata.y_offset, 0x0])) #Metadata first.
             frame_file.write(bytearray(frame.tiles)) #And now the tiles.
@@ -148,5 +148,5 @@ class Command:
         with open(frame_filename, "rb") as frame_file:
             character = self.createanims.characters[self.createanims.current_character]
             frame = Frame(list(frame_file.read()))
-            character.frames[self.createanims.current_frame] = frame
+            character.frames[self.createanims.current_frame_id] = frame
         self.createanims.refresh_UI()

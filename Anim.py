@@ -50,7 +50,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
     def on_left_click(self, event=None):
         self.select()
         if self.createanims.current_chr_tile_index is not None: #If there is some tile in the CHR window selected.
-            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame] #It could be a good idea to add a get_frame(). But you know, that's what most people do. I only do it if it's convenient. Here, this is just way clearer.
+            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #It could be a good idea to add a get_frame(). But you know, that's what most people do. I only do it if it's convenient. Here, this is just way clearer.
             frame.tiles[self.anim_index] = self.createanims.current_chr_tile_index
             self.createanims.anim.refresh()
 
@@ -61,7 +61,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             self.tile_image_object.update_tile_label()
 
     def on_double_right_click(self, event=None):
-        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame]
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         frame.tiles[self.anim_index] = 0xFF
         self.createanims.anim.refresh()
 
@@ -91,7 +91,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.anim_canvas.delete("all") #Yeah, we will delete everything just in case just like TileUtils. And well, not 'just in case', without this, tag bind Button-1, then Shift+T, and second time it doesn't work anymore. Probably due to these references not letting the changes go through or something of the sort.
         initial_y = INITIAL_Y_FRAME - 16
         self.createanims.anim_images = []
-        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame]
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         cell_id = 0 #Let's call it this way, probably the most accurate. tile_id could be confused with the tile_id stored in the cell, frame_tile_id would be another candidate to refer to the tile_id stored in the frame, but mixing frame and tile can be a bit confusing as with row and tile in the same name (I did it for TileUtils).
         for row in range(frame.metadata.y_length):
             initial_x = INITIAL_X_FRAME

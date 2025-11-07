@@ -36,7 +36,6 @@ class CreateAnims:
         self.current_tile_image_rectangle = None
         self.current_chr_tile_index = None #We will need it to update anim's image.
         self.current_anim_image_rectangle = None
-        self.current_frame = None
         self.palette_directory = None
         self.chr_directory = None
         self.chr_palette_directory = None

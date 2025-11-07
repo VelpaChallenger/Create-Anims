@@ -385,7 +385,7 @@ class TileUtils:
         self.createanims.chr_entry.delete(0, "end")
         self.createanims.chr_entry.insert(0, str(new_chr_bank))
         character = self.createanims.characters[self.createanims.current_character]
-        character.frames[self.createanims.current_frame].metadata.chr_bank = new_chr_bank
+        character.frames[self.createanims.current_frame_id].metadata.chr_bank = new_chr_bank
         character_chr = character.chrs.get(new_chr_bank, None)
         if character_chr is None:
             self.createanims.chr_info_text.configure(text="Empty for current character. Please make sure the CHR Bank really is empty in the ROM and not used by another character or for other purposes like stages.", fg="blue") #Blue so that you do see it.
