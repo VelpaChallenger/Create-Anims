@@ -185,9 +185,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame] = new_frame_id
         self.createanims.current_frame_id = new_frame_id
         frame = character.frames[new_frame_id]
-        #self.createanims.current_chr_bank = frame.metadata.chr_bank
         self.createanims.tile_utils.load_new_chr_bank(frame.metadata.chr_bank, refresh_UI_flag=False)
         self.decide_arrow_buttons_status(new_frame_id, len(character.frames) - 1, self.createanims.frame_id_left_arrow, self.createanims.frame_id_right_arrow)
+        self.createanims.current_anim_image_rectangle = None
         self.createanims.refresh_UI()
 
     def decide_arrow_buttons_status(self, new_value, upper_boundary, left_arrow, right_arrow): #I was a bit hesitant to create two or rather to think of making two but... makes more sense. They are conceptually different. #Also yes let's make it more generic in this case.
