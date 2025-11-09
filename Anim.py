@@ -155,6 +155,22 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         return True
 
     def validate_frame_entry(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            self.createanims.frame_entry.configure(highlightcolor="white", highlightbackground="white")
+            return True
+        try: #Validation 1: value must be an integer, 0 or positive.
+            int(new_value)
+        except ValueError:
+            self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        anim = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim]
+        if int(new_value) > len(anim.frame_ids) - 1: #Validation 2: value must not be greater than the maximum amount of frames for the current anim of the current character.
+            self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        self.createanims.frame_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
     def validate_frame_id_entry(self, new_value):
@@ -176,7 +192,21 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
-    def load_new_frame_id(self, new_frame_id):
+    def load_new_frame(self, new_frame):
+        self.createanims.frame_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.current_frame = new_frame
+        self.createanims.frame_entry.delete(0, "end")
+        self.createanims.frame_entry.insert(0, str(new_frame))
+        self.createanims.current_frame = new_frame
+        character = self.createanims.characters[self.createanims.current_character]
+        frame_id = character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame]
+        if frame_id != self.createanims.current_frame_id: #Clear it only if they're actually different. Also has to happen here before load_new_frame_id overwrites it.
+            self.createanims.current_anim_image_rectangle = None
+        self.load_new_frame_id(frame_id, refresh_UI_flag=False)
+        self.decide_arrow_buttons_status(new_frame, len(character.anims[self.createanims.current_anim].frame_ids) - 1, self.createanims.frame_left_arrow, self.createanims.frame_right_arrow)
+        self.createanims.refresh_UI()
+
+    def load_new_frame_id(self, new_frame_id, refresh_UI_flag=True):
         self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_frame_id = new_frame_id
         self.createanims.frame_id_entry.delete(0, "end")
@@ -188,7 +218,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.tile_utils.load_new_chr_bank(frame.metadata.chr_bank, refresh_UI_flag=False)
         self.decide_arrow_buttons_status(new_frame_id, len(character.frames) - 1, self.createanims.frame_id_left_arrow, self.createanims.frame_id_right_arrow)
         self.createanims.current_anim_image_rectangle = None
-        self.createanims.refresh_UI()
+        if refresh_UI_flag:
+            self.createanims.refresh_UI()
 
     def decide_arrow_buttons_status(self, new_value, upper_boundary, left_arrow, right_arrow): #I was a bit hesitant to create two or rather to think of making two but... makes more sense. They are conceptually different. #Also yes let's make it more generic in this case.
         if new_value == 0:
