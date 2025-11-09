@@ -17,7 +17,12 @@ class EntryReturn:
         self.createanims.tile_utils.load_new_chr_bank(new_chr_bank) #New because it's not exactly the same thing we do on init. We don't display the text for example. Nor we care if the character has the CHR or not.
 
     def anim_entry(self, event=None):
-        pass
+        anim_entry_value = self.createanims.anim_entry.get()
+        if not anim_entry_value:
+            self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        new_anim = int(anim_entry_value)
+        self.createanims.anim.load_new_anim(new_anim)
 
     def frame_entry(self, event=None):
         frame_entry_value = self.createanims.frame_entry.get()

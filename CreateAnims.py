@@ -119,9 +119,9 @@ class CreateAnims:
         self.anim_entry = tkinter.Entry(frame_anim_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
         self.anim_entry.bind("<Return>", self.entry_return.anim_entry)
         self.anim_entry.pack(side="left")
-        self.anim_left_arrow = ttk.Button(frame_anim_field, text="", style="Left.TButton")
+        self.anim_left_arrow = ttk.Button(frame_anim_field, text="", style="Left.TButton", command=self.button.anim_left_arrow_button)
         self.anim_left_arrow.pack(side="left", padx=(5, 2))
-        self.anim_right_arrow = ttk.Button(frame_anim_field, text="", style="Right.TButton")
+        self.anim_right_arrow = ttk.Button(frame_anim_field, text="", style="Right.TButton", command=self.button.anim_right_arrow_button)
         self.anim_right_arrow.pack(side="left")
 
         frame_field = tkinter.Frame(self.root, border=0)

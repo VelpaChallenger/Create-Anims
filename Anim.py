@@ -152,6 +152,22 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.current_anim_image_outer_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")
 
     def validate_anim_entry(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
+            return True
+        try: #Validation 1: value must be an integer, 0 or positive.
+            int(new_value)
+        except ValueError:
+            self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        character = self.createanims.characters[self.createanims.current_character]
+        if int(new_value) > len(character.anims) - 1: #Validation 2: value must not be greater than the maximum amount of anims for the current character.
+            self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
     def validate_frame_entry(self, new_value):
@@ -192,7 +208,17 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
-    def load_new_frame(self, new_frame):
+    def load_new_anim(self, new_anim):
+        self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.current_anim = new_anim
+        self.createanims.anim_entry.delete(0, "end")
+        self.createanims.anim_entry.insert(0, str(new_anim))
+        character = self.createanims.characters[self.createanims.current_character]
+        self.decide_arrow_buttons_status(new_anim, len(character.anims) - 1, self.createanims.anim_left_arrow, self.createanims.anim_right_arrow)
+        self.load_new_frame(0, refresh_UI_flag=False) #We always start at the first frame of the anim.
+        self.createanims.refresh_UI() #Potencial refactor: let load_new_chr_bank do the UI refresh. So don't pass flag anymore. And make sure to decide arrow status and stuff before loading new CHR bank. In theory, it shouldn't affect anything, if load runs last.
+
+    def load_new_frame(self, new_frame, refresh_UI_flag=True):
         self.createanims.frame_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_frame = new_frame
         self.createanims.frame_entry.delete(0, "end")
@@ -204,7 +230,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             self.createanims.current_anim_image_rectangle = None
         self.load_new_frame_id(frame_id, refresh_UI_flag=False)
         self.decide_arrow_buttons_status(new_frame, len(character.anims[self.createanims.current_anim].frame_ids) - 1, self.createanims.frame_left_arrow, self.createanims.frame_right_arrow)
-        self.createanims.refresh_UI()
+        if refresh_UI_flag:
+            self.createanims.refresh_UI()
 
     def load_new_frame_id(self, new_frame_id, refresh_UI_flag=True):
         self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
