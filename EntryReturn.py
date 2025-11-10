@@ -39,3 +39,11 @@ class EntryReturn:
             return False
         new_frame_id = int(frame_id_entry_value)
         self.createanims.anim.load_new_frame_id(new_frame_id)
+
+    def character_entry(self, event=None):
+        character_entry_value = self.createanims.character_entry.get()
+        if not character_entry_value:
+            self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        new_character = int(character_entry_value)
+        self.createanims.anim.load_new_character(new_character)

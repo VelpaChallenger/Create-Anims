@@ -14,6 +14,7 @@ def main():
     createanims.root_dir = "../characters"
     load_game_anims(createanims)
     createanims.current_character = 0 #ID-based.
+    createanims.character_entry.insert(0, str(createanims.current_character))
     createanims.current_chr_bank = next(iter(createanims.characters[0].chrs)) #Though I don't really like having to use next and iter. But meh. To get first key. #More generic this way. Won't matter whoever is first character. #0x9C
     createanims.chr_entry.insert(0, str(createanims.current_chr_bank))
     createanims.current_anim = 0x00

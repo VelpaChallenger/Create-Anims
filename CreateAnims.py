@@ -114,7 +114,13 @@ class CreateAnims:
         separator = ttk.Separator(self.root, orient='horizontal')
         separator.grid(row=4, column=0, columnspan=3, sticky="nsew")
 
-        frame_anim_field = tkinter.Frame(self.root, border=0) #Let's call these fields rather than entries.
+        frame_command_base = tkinter.Frame(self.root, border=0) #It makes me feel like I'm at my base!
+        frame_command_base.grid(row=5, column=0, columnspan=3, sticky="nw") #Has to be same as anim_stage. Will use as a container for all sub-frames. Including sub-sub frames.
+
+        frame_all_anim_field = tkinter.Frame(frame_command_base, border=0)
+        frame_all_anim_field.pack(side="left")
+
+        frame_anim_field = tkinter.Frame(frame_all_anim_field, border=0) #Let's call these fields rather than entries.
         frame_anim_field.grid(row=5, column=0, sticky="nw", padx=5, pady=5)
         self.anim_label = tkinter.Label(frame_anim_field, text="Anim:", anchor="w", font=FONT, width=8)
         self.anim_label.pack(side="left")
@@ -127,7 +133,7 @@ class CreateAnims:
         self.anim_right_arrow = ttk.Button(frame_anim_field, text="", style="Right.TButton", command=self.button.anim_right_arrow_button)
         self.anim_right_arrow.pack(side="left")
 
-        frame_field = tkinter.Frame(self.root, border=0)
+        frame_field = tkinter.Frame(frame_all_anim_field, border=0)
         frame_field.grid(row=6, column=0, sticky="nw", padx=5, pady=5)
         self.frame_label = tkinter.Label(frame_field, text="Frame:", anchor="w", font=FONT, width=8)
         self.frame_label.pack(side="left")
@@ -140,7 +146,7 @@ class CreateAnims:
         self.frame_right_arrow = ttk.Button(frame_field, text="", style="Right.TButton", command=self.button.frame_right_arrow_button)
         self.frame_right_arrow.pack(side="left")
 
-        frame_id_field = tkinter.Frame(self.root, border=0)
+        frame_id_field = tkinter.Frame(frame_all_anim_field, border=0)
         frame_id_field.grid(row=7, column=0, sticky="nw", padx=5, pady=5)
         self.frame_id_label = tkinter.Label(frame_id_field, text="Frame ID:", anchor="w", font=FONT, width=8)
         self.frame_id_label.pack(side="left")
@@ -152,6 +158,22 @@ class CreateAnims:
         self.frame_id_left_arrow.pack(side="left", padx=(5, 2))
         self.frame_id_right_arrow = ttk.Button(frame_id_field, text="", style="Right.TButton", command=self.button.frame_id_right_arrow_button)
         self.frame_id_right_arrow.pack(side="left")
+
+        frame_character = tkinter.Frame(frame_command_base)
+        frame_character.pack(side="top")
+
+        frame_character_field = tkinter.Frame(frame_character)
+        frame_character_field.grid(row=5, column=0, sticky="nw", padx=5, pady=5)
+        self.character_label = tkinter.Label(frame_character_field, text="Character:", anchor="w", font=FONT, width=9)
+        self.character_label.pack(side="left")
+        vcmd = (self.root.register(self.anim.validate_character_entry), "%P")
+        self.character_entry = tkinter.Entry(frame_character_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.character_entry.bind("<Return>", self.entry_return.character_entry)
+        self.character_entry.pack(side="left")
+        self.character_left_arrow = ttk.Button(frame_character_field, text="", style="Left.TButton", command=self.button.character_left_arrow_button)
+        self.character_left_arrow.pack(side="left", padx=(5, 2))
+        self.character_right_arrow = ttk.Button(frame_character_field, text="", style="Right.TButton", command=self.button.character_right_arrow_button)
+        self.character_right_arrow.pack(side="left")
 
         self.root.bind_all("<Button-1>", lambda event: event.widget.focus_set())
 

@@ -208,6 +208,32 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
+    def validate_character_entry(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
+            return True
+        try: #Validation 1: value must be an integer, 0 or positive.
+            int(new_value)
+        except ValueError:
+            self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if int(new_value) > len(self.createanims.characters) - 1: #Validation 2: value must not be greater than the maximum amount of characters.
+            self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
+        return True
+
+    def load_new_character(self, new_character):
+        self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.current_character = new_character
+        self.createanims.character_entry.delete(0, "end")
+        self.createanims.character_entry.insert(0, str(new_character))
+        self.decide_arrow_buttons_status(new_character, len(self.createanims.characters) - 1, self.createanims.character_left_arrow, self.createanims.character_right_arrow)
+        self.load_new_anim(self.createanims.current_anim) #We preserve anim. I find it useful if you want to compare how the same anim looks from one character to the other. Frame cannot really be preserved or... oh wait. It can. Every anim... or... oh no. No it can't. Some anims will definitely have same amount of frames. But not necessarily.
+
     def load_new_anim(self, new_anim):
         self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_anim = new_anim
