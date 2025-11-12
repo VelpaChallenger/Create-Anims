@@ -41,6 +41,7 @@ class CreateAnims:
         self.chr_palette_directory = None
         self.frames_directory = None
         self.anims_directory = None
+        self.png_img = []
 
     def init_anim_window(self):
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
@@ -174,6 +175,14 @@ class CreateAnims:
         self.character_left_arrow.pack(side="left", padx=(5, 2))
         self.character_right_arrow = ttk.Button(frame_character_field, text="", style="Right.TButton", command=self.button.character_right_arrow_button)
         self.character_right_arrow.pack(side="left")
+
+        frame_anim_player = tkinter.Frame(frame_command_base) #Anim player, I like the sound of that! Then play_anim for the button itself. Or maybe button will be here in this frame.
+        frame_anim_player.pack(side="left")
+
+        self.play_anim_button = ttk.Button(frame_anim_player, text="Play Anim", command=self.button.play_anim)
+        self.play_anim_button.pack(side="left", padx=(5, 2))
+        self.play_anim_label = tkinter.Label(frame_anim_player)
+        self.play_anim_label.pack(side="left")
 
         self.root.bind_all("<Button-1>", lambda event: event.widget.focus_set())
 

@@ -42,3 +42,17 @@ class CreateAnimsButton:
     def character_right_arrow_button(self, event=None):
         new_character = self.createanims.current_character + 1
         self.createanims.anim.load_new_character(new_character)
+
+    def play_anim(self, event=None):
+        import tkinter
+        self.createanims.png_img.clear()
+        character = self.createanims.characters[self.createanims.current_character]
+        frame_id = character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame]
+        img = tkinter.PhotoImage(file=f"{self.createanims.root_dir}/{character.name}/images/{character.name}_frame_{frame_id:03d}.png") #(self.createanims.tiles_images[0].pre_tkimg.resize((16, 16)))
+        self.createanims.png_img.append(img) #Say no to garbage collection of PhotoImage.
+        self.createanims.play_anim_label.configure(image=img)
+        if self.createanims.current_frame == len(character.anims[self.createanims.current_anim].frame_ids) - 1:
+            self.createanims.current_frame = 0
+        else:
+            self.createanims.current_frame += 1
+        self.createanims.root.after(47, self.play_anim) #I think 47 is the magical number. Looks really, really good.
