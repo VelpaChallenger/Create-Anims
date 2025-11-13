@@ -94,12 +94,13 @@ def generate_png(frame):
             cell_id += 1
     return png #Yeah, the caller will decide how to use it, save it and stuff.
 
-characters_name_list = os.listdir(ROOT_DIR)
-for character_name in characters_name_list:
-    character = Character(ROOT_DIR, character_name) #There you go. Now it's completely decoupled from the UI component.
-    for i, frame in enumerate(character.frames): #Now the magic starts.
-        refresh_chr(character, frame.metadata.chr_bank) #Let's do it here. Makes more sense to me.
-        png = generate_png(frame) #Oww, I really wanted this code to be exactly in the middle. Well, let's move generate_png as closest to the top. Yay.
-        png_path = f"{ROOT_DIR}/{character_name}/images"
-        os.path.isdir(png_path) or os.makedirs(png_path) #I love that.
-        png.save(f"{png_path}/{character_name}_frame_{i:03d}.png", "PNG")
+if __name__ == "__main__":
+    characters_name_list = os.listdir(ROOT_DIR)
+    for character_name in characters_name_list:
+        character = Character(ROOT_DIR, character_name) #There you go. Now it's completely decoupled from the UI component.
+        for i, frame in enumerate(character.frames): #Now the magic starts.
+            refresh_chr(character, frame.metadata.chr_bank) #Let's do it here. Makes more sense to me.
+            png = generate_png(frame) #Oww, I really wanted this code to be exactly in the middle. Well, let's move generate_png as closest to the top. Yay.
+            png_path = f"{ROOT_DIR}/{character_name}/images"
+            os.path.isdir(png_path) or os.makedirs(png_path) #I love that.
+            png.save(f"{png_path}/{character_name}_frame_{i:03d}.png", "PNG")

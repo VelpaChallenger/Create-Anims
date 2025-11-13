@@ -45,6 +45,7 @@ class CreateAnimsButton:
 
     def play_anim_button(self, event=None):
         import tkinter
+        self.createanims.anim.generate_png_from_anim_frames(self.createanims.characters[self.createanims.current_character]) #From the frames in the anim.
         self.createanims.in_play_anim = True
         self.createanims.play_anim_button.configure(state="disabled")
         self.createanims.stop_anim_button.configure(state="normal")

@@ -1,3 +1,4 @@
+import os
 from PIL import Image, ImageTk
 
 INITIAL_X_FRAME = 375 #To know from where to start col by col, row by row. The cells.
@@ -311,3 +312,14 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.character_entry.configure(state="normal")
         self.createanims.character_left_arrow.configure(state="normal")
         self.createanims.character_right_arrow.configure(state="normal")
+
+    def generate_png_from_anim_frames(self, character):
+        from generate_anim_images import refresh_chr, generate_png
+        for frame_id in character.anims[self.createanims.current_anim].frame_ids:
+            frame = character.frames[frame_id]
+            current_chr_bank = frame.metadata.chr_bank
+            refresh_chr(character, current_chr_bank)
+            png = generate_png(frame)
+            png_path = f"{self.createanims.root_dir}/{character.name}/images"
+            os.path.isdir(png_path) or os.makedirs(png_path) #This time I feel like explaining, so or shortcircuits, which means, this is an indirect if. If the path exists, nothing else to do. If it doesn't, then make the dir.
+            png.save(f"{png_path}/{character.name}_frame_{frame_id:03d}.png", "PNG")
