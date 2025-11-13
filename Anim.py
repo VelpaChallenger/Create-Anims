@@ -298,6 +298,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.character_entry.configure(state="disabled")
         self.createanims.character_left_arrow.configure(state="disabled")
         self.createanims.character_right_arrow.configure(state="disabled")
+        self.createanims.menu_bar.entryconfigure("File", state="disabled")
+        self.createanims.menu_bar.entryconfigure("Anim", state="disabled")
+        self.createanims.menu_bar.entryconfigure("Import", state="disabled")
 
     def enable_all(self):
         self.createanims.anim_entry.configure(state="normal")
@@ -312,6 +315,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.character_entry.configure(state="normal")
         self.createanims.character_left_arrow.configure(state="normal")
         self.createanims.character_right_arrow.configure(state="normal")
+        self.createanims.menu_bar.entryconfigure("File", state="normal")
+        self.createanims.menu_bar.entryconfigure("Anim", state="normal")
+        self.createanims.menu_bar.entryconfigure("Import", state="normal")
 
     def play_anim(self, event=None): #The one that runs over and over. Then the init code runs only once. Alternative is to create StringVar and then trace and pass this. But you still get two functions. I like more this.
         import tkinter
