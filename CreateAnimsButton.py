@@ -45,13 +45,20 @@ class CreateAnimsButton:
 
     def play_anim_button(self, event=None):
         import tkinter
+        self.createanims.in_play_anim = True
+        self.createanims.play_anim_button.configure(state="disabled")
+        self.createanims.stop_anim_button.configure(state="normal")
         self.createanims.anim_canvas.delete('all')
+        self.createanims.anim.disable_all()
+        self.createanims.tile_utils.disable_all()
         self.createanims.play_anim_label = tkinter.Label(self.createanims.anim_canvas, bd=0)
         self.createanims.play_anim_label.place(x=375, y=36)
         self.play_anim()
 
     def play_anim(self, event=None): #The one that runs over and over. Then the init code runs only once. Alternative is to create StringVar and then trace and pass this. But you still get two functions. I like more this.
         import tkinter
+        if not self.createanims.in_play_anim:
+            return #And the chain stops.
         self.createanims.png_img.clear()
         character = self.createanims.characters[self.createanims.current_character]
         frame_id = character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame]
@@ -63,3 +70,12 @@ class CreateAnimsButton:
         else:
             self.createanims.current_frame += 1
         self.createanims.root.after(47, self.play_anim) #I think 47 is the magical number. Looks really, really good.
+
+    def stop_anim_button(self, event=None):
+        self.createanims.anim.enable_all()
+        self.createanims.tile_utils.enable_all()
+        self.createanims.play_anim_label.destroy()
+        self.createanims.anim.load_new_anim(self.createanims.current_anim) #For now, but the idea is to save whatever frame was active when the anim was started. Then restore that. So load_new_frame and that frame. Anim will be the same, cannot be changed during playing since it's all disabled.
+        self.createanims.play_anim_button.configure(state="normal")
+        self.createanims.stop_anim_button.configure(state="disabled")
+        self.createanims.in_play_anim = False

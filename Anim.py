@@ -283,3 +283,31 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             right_arrow.configure(state="disabled")
         else:
             right_arrow.configure(state="normal")
+
+    def disable_all(self):
+        self.createanims.anim_entry.configure(state="disabled")
+        self.createanims.anim_left_arrow.configure(state="disabled")
+        self.createanims.anim_right_arrow.configure(state="disabled")
+        self.createanims.frame_entry.configure(state="disabled")
+        self.createanims.frame_left_arrow.configure(state="disabled")
+        self.createanims.frame_right_arrow.configure(state="disabled")
+        self.createanims.frame_id_entry.configure(state="disabled")
+        self.createanims.frame_id_left_arrow.configure(state="disabled")
+        self.createanims.frame_id_right_arrow.configure(state="disabled")
+        self.createanims.character_entry.configure(state="disabled")
+        self.createanims.character_left_arrow.configure(state="disabled")
+        self.createanims.character_right_arrow.configure(state="disabled")
+
+    def enable_all(self):
+        self.createanims.anim_entry.configure(state="normal")
+        self.createanims.anim_left_arrow.configure(state="normal")
+        self.createanims.anim_right_arrow.configure(state="normal")
+        self.createanims.frame_entry.configure(state="normal")
+        self.createanims.frame_left_arrow.configure(state="normal")
+        self.createanims.frame_right_arrow.configure(state="normal")
+        self.createanims.frame_id_entry.configure(state="normal")
+        self.createanims.frame_id_left_arrow.configure(state="normal")
+        self.createanims.frame_id_right_arrow.configure(state="normal")
+        self.createanims.character_entry.configure(state="normal")
+        self.createanims.character_left_arrow.configure(state="normal")
+        self.createanims.character_right_arrow.configure(state="normal")

@@ -42,6 +42,7 @@ class CreateAnims:
         self.frames_directory = None
         self.anims_directory = None
         self.png_img = []
+        self.in_play_anim = False
 
     def init_anim_window(self):
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
@@ -180,8 +181,10 @@ class CreateAnims:
         frame_anim_player = tkinter.Frame(frame_command_base) #Anim player, I like the sound of that! Then play_anim for the button itself. Or maybe button will be here in this frame.
         frame_anim_player.pack(side="left")
 
-        self.play_anim_button = ttk.Button(frame_anim_player, text="Play Anim", command=self.button.play_anim_button)
-        self.play_anim_button.pack(side="left", padx=(5, 2))
+        self.play_anim_button = ttk.Button(frame_anim_player, text="Play Anim", command=self.button.play_anim_button, takefocus = 0)
+        self.play_anim_button.pack(side="top", padx=(5, 2), pady=(5, 5))
+        self.stop_anim_button = ttk.Button(frame_anim_player, text="Stop Anim", command=self.button.stop_anim_button, state="disabled") #Only one can be active at a time.
+        self.stop_anim_button.pack(side="top", padx=(5, 2), pady=(5, 5))
 
         self.root.bind_all("<Button-1>", lambda event: event.widget.focus_set())
 

@@ -138,6 +138,9 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         self.color_picker_canvas.tag_bind(self.color_picker_rectangle, "<Button-1>", self.on_left_click)
 
     def on_left_click(self, event=None):
+        if self.createanims.in_play_anim:
+            self.createanims.chr_info_text.configure(text="You're currently playing an anim. Please click on 'Stop Anim' before you continue with your edits.", fg="blue")
+            return
         if self.createanims.current_color_picker_rectangle is not None:
             current_rgb = self.color_picker_canvas.itemcget(self.createanims.current_color_picker_rectangle, "fill")
             self.color_picker_canvas.itemconfig(self.createanims.current_color_picker_rectangle, outline=current_rgb) #Outline "" doesn't really work. It leaves some borders. (copypasted)
@@ -184,6 +187,9 @@ class TileImage:
         self.select()
 
     def on_double_left_click(self, event=None):
+        if self.createanims.in_play_anim: #Some things you'll actually still be able to do. But others, no.
+            self.createanims.chr_info_text.configure(text="You're currently playing an anim. Please click on 'Stop Anim' before you continue with your edits.", fg="blue")
+            return
         initial_x, initial_y = self.chr_canvas.coords(self.tile_image) #We could also cache this but uh, yeah. Let's get them here before we delete the image (also yeah, if I stored it, I would have to update it with every move... not fun).
         self.createanims.tile_utils.delete_tile_image_rectangles()
         chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank] #It has a bit of everything from refresh_chr. But has to be different because on the one hand, I only want just one image updated. And on the other, it'd just get messy to have everything under the same function.
@@ -208,7 +214,8 @@ class TileImage:
         self.createanims.anim.refresh()
 
     def on_right_click_motion(self, event): #Not None anymore cause now I'm gonna use it.
-        if not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
+        if self.createanims.in_play_anim or not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
+            self.createanims.chr_info_text.configure(text="You're currently playing an anim. Please click on 'Stop Anim' before you continue with your edits.", fg="blue")
             return
         tile_row = event.y // 16
         tile_col = event.x // 16 #We only care about the integer part. >> 4 achieves same but, again this is more explicit for me.
@@ -405,3 +412,13 @@ class TileUtils:
             self.createanims.chr_right_arrow.configure(state="disabled")
         else:
             self.createanims.chr_right_arrow.configure(state="normal")
+
+    def disable_all(self):
+        self.createanims.chr_entry.configure(state="disabled")
+        self.createanims.chr_left_arrow.configure(state="disabled")
+        self.createanims.chr_right_arrow.configure(state="disabled")
+
+    def enable_all(self):
+        self.createanims.chr_entry.configure(state="normal")
+        self.createanims.chr_left_arrow.configure(state="normal")
+        self.createanims.chr_right_arrow.configure(state="normal")
