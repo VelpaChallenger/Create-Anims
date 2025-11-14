@@ -209,6 +209,24 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
+    def validate_physics_id_entry(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
+            return True
+        try: #Validation 1: value must be an integer, 0 or positive.
+            int(new_value)
+        except ValueError:
+            self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if int(new_value) > len(self.createanims.physics_list) - 1: #Validation 2: value must not be greater than the maximum amount of physics available.
+            self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
+        return True
+
     def validate_character_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -227,6 +245,15 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
+    def load_new_physics_id(self, new_physics_id):
+        self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.current_physics_id = new_physics_id
+        self.createanims.physics_id_entry.delete(0, "end")
+        self.createanims.physics_id_entry.insert(0, str(new_physics_id))
+        anim = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim]
+        anim.physics_id = new_physics_id #This is important because there can be two sources. Maybe we loaded a new anim, in which case this will leave it exactly as intended because, here the new_physics_id is the anim physics_id, but if we changed it via the physics ID entry, then it needs to be updated with the new value. And yes, same happens with CHR bank when we load_frame_id.
+        self.decide_arrow_buttons_status(new_physics_id, len(self.createanims.physics_list) - 1, self.createanims.physics_id_left_arrow, self.createanims.physics_id_right_arrow) #And nothing else in this case. It's like loading a CHR in a way. Though it's even more different in that an update in physics ID does not require an UI refresh. It will only change the field, and then what happens when you click on Play Anim.
+
     def load_new_character(self, new_character, new_frame=0):
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_character = new_character
@@ -242,6 +269,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.anim_entry.insert(0, str(new_anim))
         character = self.createanims.characters[self.createanims.current_character]
         self.decide_arrow_buttons_status(new_anim, len(character.anims) - 1, self.createanims.anim_left_arrow, self.createanims.anim_right_arrow)
+        self.load_new_physics_id(character.anims[self.createanims.current_anim].physics_id)
         self.load_new_frame(new_frame, refresh_UI_flag=False) #We always start at the first frame of the anim. #But can be changed/adjusted. Very useful to keep editing the same frame after stop anim.
         self.createanims.refresh_UI() #Potencial refactor: let load_new_chr_bank do the UI refresh. So don't pass flag anymore. And make sure to decide arrow status and stuff before loading new CHR bank. In theory, it shouldn't affect anything, if load runs last.
 
@@ -295,6 +323,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.frame_id_entry.configure(state="disabled")
         self.createanims.frame_id_left_arrow.configure(state="disabled")
         self.createanims.frame_id_right_arrow.configure(state="disabled")
+        self.createanims.physics_id_entry.configure(state="disabled")
+        self.createanims.physics_id_left_arrow.configure(state="disabled")
+        self.createanims.physics_id_right_arrow.configure(state="disabled")
         self.createanims.character_entry.configure(state="disabled")
         self.createanims.character_left_arrow.configure(state="disabled")
         self.createanims.character_right_arrow.configure(state="disabled")
@@ -312,6 +343,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.frame_id_entry.configure(state="normal")
         self.createanims.frame_id_left_arrow.configure(state="normal")
         self.createanims.frame_id_right_arrow.configure(state="normal")
+        self.createanims.physics_id_entry.configure(state="normal")
+        self.createanims.physics_id_left_arrow.configure(state="normal")
+        self.createanims.physics_id_right_arrow.configure(state="normal")
         self.createanims.character_entry.configure(state="normal")
         self.createanims.character_left_arrow.configure(state="normal")
         self.createanims.character_right_arrow.configure(state="normal")

@@ -35,6 +35,14 @@ class CreateAnimsButton:
         new_anim = self.createanims.current_anim + 1
         self.createanims.anim.load_new_anim(new_anim)
 
+    def physics_id_left_arrow_button(self, event=None):
+        new_physics_id = self.createanims.current_physics_id - 1
+        self.createanims.anim.load_new_physics_id(new_physics_id)
+
+    def physics_id_right_arrow_button(self, event=None):
+        new_physics_id = self.createanims.current_physics_id + 1
+        self.createanims.anim.load_new_physics_id(new_physics_id)
+
     def character_left_arrow_button(self, event=None):
         new_character = self.createanims.current_character - 1
         self.createanims.anim.load_new_character(new_character)

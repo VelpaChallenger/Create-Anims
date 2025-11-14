@@ -40,6 +40,14 @@ class EntryReturn:
         new_frame_id = int(frame_id_entry_value)
         self.createanims.anim.load_new_frame_id(new_frame_id)
 
+    def physics_id_entry(self, event=None):
+        physics_id_value = self.createanims.physics_id_entry.get()
+        if not physics_id_value:
+            self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        new_physics_id = int(physics_id_value)
+        self.createanims.anim.load_new_physics_id(new_physics_id)
+
     def character_entry(self, event=None):
         character_entry_value = self.createanims.character_entry.get()
         if not character_entry_value:

@@ -13,7 +13,7 @@ from CreateAnimsButton import *
 FONT = ("TkDefaultFont", 16)
 
 WIDTH = 860
-HEIGHT = 600
+HEIGHT = 620
 INITIAL_X = 500
 INITIAL_Y = 200
 
@@ -43,6 +43,7 @@ class CreateAnims:
         self.anims_directory = None
         self.png_img = []
         self.in_play_anim = False
+        self.physics_list = []
 
     def init_anim_window(self):
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
@@ -122,7 +123,7 @@ class CreateAnims:
 
         frame_anim_field = tkinter.Frame(frame_all_anim_field, border=0) #Let's call these fields rather than entries.
         frame_anim_field.grid(row=5, column=0, sticky="nw", padx=5, pady=5)
-        self.anim_label = tkinter.Label(frame_anim_field, text="Anim:", anchor="w", font=FONT, width=8)
+        self.anim_label = tkinter.Label(frame_anim_field, text="Anim:", anchor="w", font=FONT, width=9)
         self.anim_label.pack(side="left")
         vcmd = (self.root.register(self.anim.validate_anim_entry), "%P")
         self.anim_entry = tkinter.Entry(frame_anim_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
@@ -135,7 +136,7 @@ class CreateAnims:
 
         frame_field = tkinter.Frame(frame_all_anim_field, border=0)
         frame_field.grid(row=6, column=0, sticky="nw", padx=5, pady=5)
-        self.frame_label = tkinter.Label(frame_field, text="Frame:", anchor="w", font=FONT, width=8)
+        self.frame_label = tkinter.Label(frame_field, text="Frame:", anchor="w", font=FONT, width=9)
         self.frame_label.pack(side="left")
         vcmd = (self.root.register(self.anim.validate_frame_entry), "%P")
         self.frame_entry = tkinter.Entry(frame_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
@@ -148,7 +149,7 @@ class CreateAnims:
 
         frame_id_field = tkinter.Frame(frame_all_anim_field, border=0)
         frame_id_field.grid(row=7, column=0, sticky="nw", padx=5, pady=5)
-        self.frame_id_label = tkinter.Label(frame_id_field, text="Frame ID:", anchor="w", font=FONT, width=8)
+        self.frame_id_label = tkinter.Label(frame_id_field, text="Frame ID:", anchor="w", font=FONT, width=9)
         self.frame_id_label.pack(side="left")
         vcmd = (self.root.register(self.anim.validate_frame_id_entry), "%P")
         self.frame_id_entry = tkinter.Entry(frame_id_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
@@ -158,6 +159,19 @@ class CreateAnims:
         self.frame_id_left_arrow.pack(side="left", padx=(5, 2))
         self.frame_id_right_arrow = ttk.Button(frame_id_field, text="", style="Right.TButton", command=self.button.frame_id_right_arrow_button)
         self.frame_id_right_arrow.pack(side="left")
+
+        physics_id_field = tkinter.Frame(frame_all_anim_field, border=0)
+        physics_id_field.grid(row=8, column=0, sticky="nw", padx=5, pady=5)
+        self.physics_id_label = tkinter.Label(physics_id_field, text="Physics ID:", anchor="w", font=FONT, width=9)
+        self.physics_id_label.pack(side="left")
+        vcmd = (self.root.register(self.anim.validate_physics_id_entry), "%P")
+        self.physics_id_entry = tkinter.Entry(physics_id_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.physics_id_entry.bind("<Return>", self.entry_return.physics_id_entry)
+        self.physics_id_entry.pack(side="left")
+        self.physics_id_left_arrow = ttk.Button(physics_id_field, text="", style="Left.TButton", command=self.button.physics_id_left_arrow_button)
+        self.physics_id_left_arrow.pack(side="left", padx=(5, 2))
+        self.physics_id_right_arrow = ttk.Button(physics_id_field, text="", style="Right.TButton", command=self.button.physics_id_right_arrow_button)
+        self.physics_id_right_arrow.pack(side="left")
 
         frame_character = tkinter.Frame(frame_command_base)
         frame_character.pack(side="left", anchor="nw")
