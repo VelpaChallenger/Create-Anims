@@ -399,4 +399,16 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
         for n in range(len(physics) // 2):
             label = tkinter.Label(self.createanims.frame_physics, text=f"{n:02d}")
-            label.grid(row=0, column=n+1)
+            label.grid(row=0, column=n+1, padx=(2, 2))
+            x_physics = self.calculate_physics(physics[2*n])
+            x_label = tkinter.Label(self.createanims.frame_physics, text=f"{x_physics:02d}")
+            x_label.grid(row=1, column=n+1)
+            y_physics = self.calculate_physics(physics[(2*n) + 1])
+            y_label = tkinter.Label(self.createanims.frame_physics, text=f"{y_physics:02d}")
+            y_label.grid(row=2, column=n+1)
+
+    def calculate_physics(self, value): #Ok no, turns out it's different logic. But still, similar. #Very much the same as calculate_fine_pitch (parse_mml). I was going to do the whole toggle XOR thing and then -1 but, this will do.
+        if value >= 0x80:
+            return - (0x100 - value) #Yeah it's different because in calculate_fine_pitch, it has to give you the negative number still in 6502 format, like, 0xFD for example, but here I want the raw number, I want the -3 for example.
+        else:
+            return value
