@@ -387,3 +387,16 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             png_path = f"{self.createanims.root_dir}/{character.name}/images"
             os.path.isdir(png_path) or os.makedirs(png_path) #This time I feel like explaining, so or shortcircuits, which means, this is an indirect if. If the path exists, nothing else to do. If it doesn't, then make the dir.
             png.save(f"{png_path}/{character.name}_frame_{frame_id:03d}.png", "PNG")
+
+    def fill_physics_grid(self):
+        import tkinter #Well no can do. This specifically will need it.
+        label = tkinter.Label(self.createanims.frame_physics, text="Coordinate")
+        label.grid(row=0, column=0)
+        label = tkinter.Label(self.createanims.frame_physics, text="X")
+        label.grid(row=1, column=0, sticky="nsew")
+        label = tkinter.Label(self.createanims.frame_physics, text="Y")
+        label.grid(row=2, column=0, sticky="nsew")
+        physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        for n in range(len(physics) // 2):
+            label = tkinter.Label(self.createanims.frame_physics, text=f"{n:02d}")
+            label.grid(row=0, column=n+1)
