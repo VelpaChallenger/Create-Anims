@@ -507,5 +507,5 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         )
 
     def restart_physics(self):
-        self.createanims.physics_initial_x = -100 #Also yes, these could be members/fields of Anim. Key word "could".
-        self.createanims.physics_initial_y = 100
+        self.createanims.physics_initial_x = 0 #-100 #Also yes, these could be members/fields of Anim. Key word "could".
+        self.createanims.physics_initial_y = 0 #100
