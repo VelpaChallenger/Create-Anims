@@ -396,16 +396,21 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         label.grid(row=1, column=0, sticky="nsew")
         label = tkinter.Label(self.createanims.frame_physics, text="Y")
         label.grid(row=2, column=0, sticky="nsew")
+        current_x = 0 #Exact same logic as play_anim
+        current_y = 0
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
         for n in range(len(physics) // 2):
             label = tkinter.Label(self.createanims.frame_physics, text=f"{n:02d}")
             label.grid(row=0, column=n+1, padx=(2, 2))
             x_physics = self.calculate_physics(physics[2*n])
+            current_x += x_physics #No *2 in this case. Helps with not making drawings too big, but the general idea should still be there.
             x_label = tkinter.Label(self.createanims.frame_physics, text=f"{x_physics:02d}")
             x_label.grid(row=1, column=n+1)
             y_physics = self.calculate_physics(physics[(2*n) + 1])
+            current_y += y_physics
             y_label = tkinter.Label(self.createanims.frame_physics, text=f"{y_physics:02d}")
             y_label.grid(row=2, column=n+1)
+            self.createanims.physics_graphics_canvas.create_oval(215 + current_x, 180 + current_y, 215 + current_x, 180 + current_y, width=5, outline="red")
 
     def calculate_physics(self, value): #Ok no, turns out it's different logic. But still, similar. #Very much the same as calculate_fine_pitch (parse_mml). I was going to do the whole toggle XOR thing and then -1 but, this will do.
         if value >= 0x80:

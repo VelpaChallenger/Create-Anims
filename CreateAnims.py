@@ -252,14 +252,19 @@ class CreateAnims:
         self.physics_window.grab_set() # hijack all commands from the master (clicks on the main window are ignored)
         self.physics_window.focus_force()
 
-        self.physics_canvas = tkinter.Canvas(self.physics_window, bd=0, highlightthickness=0) #scrollregion=(0,0,500,500), width=100, height=50) #Exact measures will be determined later. This is the predetermined stuff.
+        self.physics_graphics_canvas = tkinter.Canvas(self.physics_window, bd=0, highlightthickness=0, bg="white", width=256, height=100)
+        self.physics_graphics_canvas.pack(side="top", fill="both", expand=True)
+        self.physics_graphics_canvas.create_line(0, 180, 500, 180, fill="black")
+        self.physics_graphics_canvas.create_line(215, 0, 215, 180, fill="black")
+
+        self.physics_canvas = tkinter.Canvas(self.physics_window, bd=0, highlightthickness=0, height=25) #scrollregion=(0,0,500,500), width=100, height=50) #Exact measures will be determined later. This is the predetermined stuff.
         self.physics_canvas.pack(side="top", fill="both", expand=True)
         self.frame_physics = tkinter.Frame(self.physics_canvas, border=0)
         self.frame_physics.bind("<Configure>", lambda event: self.physics_canvas.configure(scrollregion=self.physics_canvas.bbox('all'))) #Let's please verify that this bind doesn't mess up memory.
         self.physics_canvas.create_window((0, 0), window=self.frame_physics, anchor="nw")
         hbar = tkinter.Scrollbar(self.physics_window, orient="horizontal", command=self.physics_canvas.xview)
         self.physics_canvas.configure(xscrollcommand=hbar.set) #One will always have a configure. canvas needs hbar for the scrollcommand. hbar needs the canvas for the command.
-        hbar.pack(side="bottom", fill="x")
+        hbar.pack(side="top", fill="x")
         self.anim.fill_physics_grid() #Changed my mind. The creation itself will happen here, then here we'll fill the values. #Physics grid is not predetermined. So, Anim will take things from here. CreateAnims has more to do with UI init stuff. The more low level stuff if you will.
         self.root.wait_window(self.physics_window) # pause anything on the main window until this one closes
         self.root.attributes('-disabled', 0)
