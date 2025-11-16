@@ -281,7 +281,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2 != len(anim.frame_ids):
             self.play_physics = False
             if not self.createanims.in_play_anim: #Don't show it when restarting due to Stop Anim.
-                messagebox.showwarning(title="Physics ID Mismatch", message=f"Warning: Anim {self.createanims.current_anim:02d} has {len(anim.frame_ids)} frames but assigned physics ID {self.createanims.current_physics_id:02d} has {len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2} pairs. Please consider updating either one of them. If you leave it as it is, you might see inconsistencies in the ROM.\nOnce you're done with your changes, consider reloading the physics ID. If this dialog no longer appears, the issue has been solved :) . Yay!")
+                messagebox.showwarning(title="Physics ID Mismatch", message=f"Warning: Anim {self.createanims.current_anim:02d} has {len(anim.frame_ids)} frame(s) but assigned physics ID {self.createanims.current_physics_id:02d} has {len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2} pair(s). Please consider updating either one of them. If you leave it as it is, you might see inconsistencies in the ROM.\nOnce you're done with your changes, consider reloading the physics ID. If this dialog no longer appears, the issue has been solved :) . Yay!")
 
     def load_new_character(self, new_character, new_frame=0):
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
