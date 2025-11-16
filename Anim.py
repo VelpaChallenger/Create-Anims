@@ -92,12 +92,19 @@ class PhysicsLabel:
         self.frame_index = frame_index
         self.label = label
         self.label.bind("<Button-3>", self.on_right_click)
+        self.label.bind("<Shift-Button-3>", self.on_shift_right_click)
 
     def on_right_click(self, event=None):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
         physics.pop(2*self.frame_index) #And that's it.
         physics.pop(2*self.frame_index) #Well two times to account also for the Y. And yeah, everything gets shifted when doing pop so this works.
         self.createanims.anim.fill_physics_grid() #Kinda like a refresh, but for physics.
+
+    def on_shift_right_click(self, event=None):
+        physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        physics.insert(self.frame_index, 0x00)
+        physics.insert(self.frame_index, 0x00)
+        self.createanims.anim.fill_physics_grid()
 
 class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of it. #Similar structure to TileUtils. You have the main class, which then uses data from other classes to do its stuff.
 
