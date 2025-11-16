@@ -102,8 +102,8 @@ class PhysicsLabel:
 
     def on_shift_right_click(self, event=None):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
-        physics.insert(self.frame_index, 0x00)
-        physics.insert(self.frame_index, 0x00)
+        physics.insert(2*self.frame_index, 0x00)
+        physics.insert(2*self.frame_index, 0x00)
         self.createanims.anim.fill_physics_grid()
 
 class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of it. #Similar structure to TileUtils. You have the main class, which then uses data from other classes to do its stuff.
