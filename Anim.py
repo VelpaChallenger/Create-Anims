@@ -85,6 +85,20 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             self.anim_canvas.moveto(self.createanims.current_anim_image_inner_rectangle, x, y)
             self.anim_canvas.moveto(self.createanims.current_anim_image_outer_rectangle, x-2, y-2)
 
+class PhysicsLabel:
+
+    def __init__(self, createanims, label, frame_index):
+        self.createanims = createanims
+        self.frame_index = frame_index
+        self.label = label
+        self.label.bind("<Button-3>", self.on_right_click)
+
+    def on_right_click(self, event=None):
+        physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        physics.pop(2*self.frame_index) #And that's it.
+        physics.pop(2*self.frame_index) #Well two times to account also for the Y. And yeah, everything gets shifted when doing pop so this works.
+        self.createanims.anim.fill_physics_grid() #Kinda like a refresh, but for physics.
+
 class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of it. #Similar structure to TileUtils. You have the main class, which then uses data from other classes to do its stuff.
 
     def __init__(self, createanims):
@@ -401,6 +415,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def fill_physics_grid(self):
         import tkinter #Well no can do. This specifically will need it.
+        self.createanims.physics_graphics_canvas.delete('PhysicsPoint') #There you go! Will use, but for graphics_canvas. #Huh wait, this will delete the window as well right? So it's going to mess the window as well? #Method could be called refresh_physics.
+        for label in self.createanims.frame_physics.winfo_children():
+            label.destroy() #Yay! This works!
         label = tkinter.Label(self.createanims.frame_physics, text="Coordinate")
         label.grid(row=0, column=0)
         label = tkinter.Label(self.createanims.frame_physics, text="X")
@@ -412,6 +429,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
         for n in range(len(physics) // 2):
             label = tkinter.Label(self.createanims.frame_physics, text=f"{n:02d}")
+            PhysicsLabel(self.createanims, label, n)
             label.grid(row=0, column=n+1, padx=(2, 2))
             aux_current_x = current_x
             x_physics = self.calculate_physics(physics[2*n])
@@ -423,8 +441,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             current_y += y_physics
             y_label = tkinter.Label(self.createanims.frame_physics, text=f"{y_physics:02d}")
             y_label.grid(row=2, column=n+1)
-            self.createanims.physics_graphics_canvas.create_oval(215 + current_x, 180 + current_y, 215 + current_x, 180 + current_y, width=5, outline="red")
-            self.createanims.physics_graphics_canvas.create_line(215 + aux_current_x, 180 + aux_current_y, 215 + current_x, 180 + current_y, fill="green")
+            self.createanims.physics_graphics_canvas.create_oval(215 + current_x, 180 + current_y, 215 + current_x, 180 + current_y, width=5, outline="red", tag="PhysicsPoint")
+            self.createanims.physics_graphics_canvas.create_line(215 + aux_current_x, 180 + aux_current_y, 215 + current_x, 180 + current_y, fill="green", tag="PhysicsPoint") #Technically not point per se, but will make things easier.
 
     def calculate_physics(self, value): #Ok no, turns out it's different logic. But still, similar. #Very much the same as calculate_fine_pitch (parse_mml). I was going to do the whole toggle XOR thing and then -1 but, this will do.
         if value >= 0x80:
