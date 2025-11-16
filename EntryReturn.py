@@ -48,6 +48,20 @@ class EntryReturn:
         new_physics_id = int(physics_id_value)
         self.createanims.anim.load_new_physics_id(new_physics_id)
 
+    def physics_dialog_x_entry(self, event=None):
+        physics_dialog_x_value = self.createanims.physics_dialog_x_entry.get()
+        physics_dialog_y_value = self.createanims.physics_dialog_y_entry.get()
+        if not physics_dialog_x_value or not physics_dialog_y_value or physics_dialog_x_value == "-" or physics_dialog_y_value == "-": #If any of them empty. #Or the negative sign was entered but without a number.
+            self.createanims.physics_dialog.destroy() #Just interpret it as an X cross click.
+            return False
+        new_x_physics = (0x100 - abs(int(physics_dialog_x_value))) if physics_dialog_x_value.startswith("-") else int(physics_dialog_x_value) #Well it could also be + int, but, yeah. Also it looks like no need to abs of an int, can apply abs directly yey. Yay or yey was typo but yey. Ah actually no you can't, it's just I wasn't entering a negative so it never ran :p There now. #Oh wait. Not that simple you're right. I need to apply the inverse.
+        new_y_physics = (0x100 - abs(int(physics_dialog_y_value))) if physics_dialog_y_value.startswith("-") else int(physics_dialog_y_value) #Aaaaaand, in case you're wondering! If you enter -0, it still works! Why? 0x100 - 0 will give 0x100. But then, in the physics grid, 0x100 - 0x100 = 0. Then -0. And it becomes just 0! But actually, it doesn't work! Because internally 0x100 is saved, so when you try to save the physics, it breaks.
+        physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        physics[2*self.createanims.physics_dialog_current_frame] = new_x_physics
+        physics[(2*self.createanims.physics_dialog_current_frame) + 1] = new_y_physics
+        self.createanims.physics_dialog_refresh = True #Shared state approach.
+        self.createanims.physics_dialog.destroy()
+
     def character_entry(self, event=None):
         character_entry_value = self.createanims.character_entry.get()
         if not character_entry_value:

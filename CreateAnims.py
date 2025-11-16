@@ -230,7 +230,7 @@ class CreateAnims:
         style.configure("Right.TButton", font=('', '20'), width=2)
 
     def bind_all_focus(self, event=None): #Goodbyte lambda.
-        if type(event.widget) == ttk.Button:
+        if type(event.widget) == ttk.Button or type(event.widget) == str: #Well I didn't really want to but, we've come this far, we already have no more lambda. Whatever. The gist of it is that when you left click on anything, this triggers, due to bind_all, and it includes labels. Physics labels, they get destroyed before this runs. When that happens, they become strings, for whatever tkinter internal reason. So, focus_set() fails. At that point we just don't care anymore.
             return #Those don't play under the same rule, those use takefocus=0.
         event.widget.focus_set()
 
@@ -277,6 +277,48 @@ class CreateAnims:
         self.root.wait_window(self.physics_window) # pause anything on the main window until this one closes
         self.root.attributes('-disabled', 0)
         self.root.focus_force()
+
+    def init_physics_dialog(self, frame_index): #Technically a window, but yeah, a dialog.
+        self.physics_dialog = tkinter.Toplevel(self.root)
+        self.physics_dialog.title(f"Update X and Y Physics for Frame {frame_index:02d}")
+        self.physics_dialog.geometry(f"300x100+665+300") #Whatever.
+        self.physics_window.attributes('-disabled', 1)
+        self.physics_dialog.transient(self.physics_window)
+        self.physics_dialog.grab_set()
+        self.physics_dialog.focus_force()
+
+        self.physics_dialog_x_frame = tkinter.Frame(self.physics_dialog, border=0)
+        self.physics_dialog_x_frame.pack(anchor="nw")
+        self.physics_dialog_x_label = tkinter.Label(self.physics_dialog_x_frame, text="X:")
+        self.physics_dialog_x_label.pack(side="left")
+        vcmd = (self.physics_dialog.register(self.anim.validate_physics_dialog_x_entry), "%P")
+        self.physics_dialog_x_entry = tkinter.Entry(self.physics_dialog_x_frame, width=4, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.physics_dialog_x_entry.bind("<Return>", self.entry_return.physics_dialog_x_entry)
+        self.physics_dialog_x_entry.pack(side="left")
+
+        self.physics_dialog_y_frame = tkinter.Frame(self.physics_dialog, border=0)
+        self.physics_dialog_y_frame.pack(anchor="nw")
+        self.physics_dialog_y_label = tkinter.Label(self.physics_dialog_y_frame, text="Y:")
+        self.physics_dialog_y_label.pack(side="left")
+        vcmd = (self.physics_dialog.register(self.anim.validate_physics_dialog_x_entry), "%P") #For Y, the function will be the same. A bit confusing maybe for future me, but please read this!
+        self.physics_dialog_y_entry = tkinter.Entry(self.physics_dialog_y_frame, width=4, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.physics_dialog_y_entry.bind("<Return>", self.entry_return.physics_dialog_x_entry)
+        self.physics_dialog_y_entry.pack(side="left", pady=(5, 5))
+
+        physics = self.physics_list[self.current_physics_id] #Ah, what a refresher. I don't have to type so much createanims here.
+        x_physics = self.anim.calculate_physics(physics[2*frame_index]) #Same as always. #Here too we need to convert. But that's why we have calculate_physics. We can call it from there directly.
+        y_physics = self.anim.calculate_physics(physics[(2*frame_index) + 1])
+        self.physics_dialog_x_entry.insert(0, str(x_physics))
+        self.physics_dialog_x_entry.select_range(0, "end")
+        self.physics_dialog_x_entry.focus()
+        self.physics_dialog_y_entry.insert(0, str(y_physics))
+        self.physics_dialog_current_frame = frame_index #Will come in handy for EntryReturn. #Actually... let's do something a little different. Or... nah whatever.
+        self.physics_dialog_refresh = False #By default, but EntryReturn might set it to True.
+        self.physics_window.wait_window(self.physics_dialog)
+        self.physics_window.attributes('-disabled', 0)
+        self.physics_window.focus_force()
+        if self.physics_dialog_refresh:
+            self.anim.fill_physics_grid()
 
     def refresh_UI(self): #This will be part of CreateAnims. All directly UI-related, idea is that it's here. Maybe not the technical like more specific code per se, but at least the highest layer.
         self.tile_utils.refresh_palette() #Changed my mind, will be part of a refresh/update UI.
