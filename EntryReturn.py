@@ -62,6 +62,14 @@ class EntryReturn:
         self.createanims.physics_dialog_refresh = True #Shared state approach.
         self.createanims.physics_dialog.destroy()
 
+    def x_offset_entry(self, event=None):
+        x_offset_value = self.createanims.x_offset_entry.get()
+        if not x_offset_value or x_offset_value == "-": #Same.
+            self.createanims.x_offset_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        new_x_offset = int(x_offset_value)
+        self.createanims.anim.load_new_x_offset(new_x_offset)
+
     def character_entry(self, event=None):
         character_entry_value = self.createanims.character_entry.get()
         if not character_entry_value:

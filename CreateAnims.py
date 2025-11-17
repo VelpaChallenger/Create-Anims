@@ -181,6 +181,22 @@ class CreateAnims:
         self.physics_id_right_arrow = ttk.Button(physics_id_field, text="", style="Right.TButton", command=self.button.physics_id_right_arrow_button)
         self.physics_id_right_arrow.pack(side="left")
 
+        frame_dimensions = tkinter.Frame(frame_command_base) #Dimensions because it's what makes me think of. Width, height, X and Y offsets will be here.
+        frame_dimensions.pack(side="left", anchor="nw")
+
+        frame_x_offset_field = tkinter.Frame(frame_dimensions)
+        frame_x_offset_field.grid(row=5, column=0, sticky="nw", padx=5, pady=5)
+        self.x_offset_label = tkinter.Label(frame_x_offset_field, text="X Offset:", anchor="w", font=FONT, width=9)
+        self.x_offset_label.pack(side="left")
+        vcmd = (self.root.register(self.anim.validate_x_offset_entry), "%P")
+        self.x_offset_entry = tkinter.Entry(frame_x_offset_field, width=4, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.x_offset_entry.bind("<Return>", self.entry_return.x_offset_entry)
+        self.x_offset_entry.pack(side="left")
+        self.x_offset_left_arrow = ttk.Button(frame_x_offset_field, text="", style="Left.TButton", command=self.button.x_offset_left_arrow_button)
+        self.x_offset_left_arrow.pack(side="left", padx=(5, 2))
+        self.x_offset_right_arrow = ttk.Button(frame_x_offset_field, text="", style="Right.TButton", command=self.button.x_offset_right_arrow_button)
+        self.x_offset_right_arrow.pack(side="left")
+
         frame_character = tkinter.Frame(frame_command_base)
         frame_character.pack(side="left", anchor="nw")
 

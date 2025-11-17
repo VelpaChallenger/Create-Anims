@@ -43,6 +43,16 @@ class CreateAnimsButton:
         new_physics_id = self.createanims.current_physics_id + 1
         self.createanims.anim.load_new_physics_id(new_physics_id)
 
+    def x_offset_left_arrow_button(self, event=None):
+        current_x_offset = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.x_offset #This will be different.
+        new_x_offset = current_x_offset - 1
+        self.createanims.anim.load_new_x_offset(new_x_offset)
+
+    def x_offset_right_arrow_button(self, event=None):
+        current_x_offset = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.x_offset
+        new_x_offset = current_x_offset + 1
+        self.createanims.anim.load_new_x_offset(new_x_offset)
+
     def character_left_arrow_button(self, event=None):
         new_character = self.createanims.current_character - 1
         self.createanims.anim.load_new_character(new_character)
