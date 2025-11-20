@@ -30,6 +30,6 @@ def main():
     createanims.current_anim = 0x00
     createanims.current_frame = 0x00
     createanims.current_frame_id = 0x01
-    createanims.anim.load_new_character(0)
+    createanims.anim.load_new_character_value(0)
     createanims.root.mainloop()
 main()

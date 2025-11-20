@@ -390,7 +390,12 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
-    def load_new_x_offset(self, new_x_offset, refresh_UI_flag=True): #I'm also still thinking about the proposal of removing refresh_UI_flag. Considering that we may come from different sources, I'm thinking it might not be as good of an idea and maybe this will do. #I was a bit hesistant to do this, but hey, it will do undo/redo a lot more convenient. Pretty much every load has this benefit, I mean yeah every load.
+    def load_new_x_offset(self, new_x_offset, refresh_UI_flag=True):
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        old_x_offset = frame.metadata.x_offset
+        self.createanims.undo_redo.undo_redo([self.load_new_x_offset_value, old_x_offset], [self.load_new_x_offset_value, new_x_offset]) #On purpose we don't send refresh_UI_flag. The default True is fine in those cases.
+
+    def load_new_x_offset_value(self, new_x_offset, refresh_UI_flag=True): #I'm also still thinking about the proposal of removing refresh_UI_flag. Considering that we may come from different sources, I'm thinking it might not be as good of an idea and maybe this will do. #I was a bit hesistant to do this, but hey, it will do undo/redo a lot more convenient. Pretty much every load has this benefit, I mean yeah every load.
         self.createanims.x_offset_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.x_offset = new_x_offset
         self.createanims.x_offset_entry.delete(0, "end")
@@ -399,7 +404,12 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if refresh_UI_flag:
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
 
-    def load_new_y_offset(self, new_y_offset, refresh_UI_flag=True): #I'm also still thinking about the proposal of removing refresh_UI_flag. Considering that we may come from different sources, I'm thinking it might not be as good of an idea and maybe this will do. #I was a bit hesistant to do this, but hey, it will do undo/redo a lot more convenient. Pretty much every load has this benefit, I mean yeah every load.
+    def load_new_y_offset(self, new_y_offset, refresh_UI_flag=True):
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        old_y_offset = frame.metadata.y_offset
+        self.createanims.undo_redo.undo_redo([self.load_new_y_offset_value, old_y_offset], [self.load_new_y_offset_value, new_y_offset])
+
+    def load_new_y_offset_value(self, new_y_offset, refresh_UI_flag=True): #I'm also still thinking about the proposal of removing refresh_UI_flag. Considering that we may come from different sources, I'm thinking it might not be as good of an idea and maybe this will do. #I was a bit hesistant to do this, but hey, it will do undo/redo a lot more convenient. Pretty much every load has this benefit, I mean yeah every load.
         self.createanims.y_offset_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.y_offset = new_y_offset
         self.createanims.y_offset_entry.delete(0, "end")
@@ -408,26 +418,37 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if refresh_UI_flag:
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
 
-    def load_new_width(self, new_width, refresh_UI_flag=True): #Yes... I don't really like that now we have two names for the same thing, width and x_length. But, I don't really like X length on the front end. So yes.
+    def load_new_width(self, new_width, refresh_UI_flag=True):
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        old_width = frame.metadata.x_length #I'm sticking to old this time around cause aux makes me think of something I'll use right away. But it's not the case here.
+        self.createanims.undo_redo.undo_redo([self.load_new_width_value, old_width, refresh_UI_flag, frame.tiles[:]], [self.load_new_width_value, new_width]) #Here we still send refresh_UI_flag cause I don't feel like using kwargs or something to pass frame_tiles but not refresh_UI_flag.
+
+    def load_new_width_value(self, new_width, refresh_UI_flag=True, frame_tiles=None): #Yes... I don't really like that now we have two names for the same thing, width and x_length. But, I don't really like X length on the front end. So yes.
         self.createanims.width_entry.configure(highlightcolor="white", highlightbackground="white")
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         aux_width = frame.metadata.x_length #We'll need this to know the step, every how many tiles we'll do 0xFF insertion. We cannot use the new one as that'll give different stepping (we'll land elsewhere). We could also make this update later. But I like it more this way.
         frame.metadata.x_length = new_width
         difference_width = new_width - aux_width
-        if difference_width >= 0: #Positive. #Changed my mind. Even if difference is zero, do perform updates. Helpful for the first time (it will still run and do the right thing).
-            frame.tiles = [tile for row in (frame.tiles[i:i+aux_width] + [0xFF]*difference_width for i in range(0, len(frame.tiles), aux_width)) for tile in row] #Complex, but give me a moment and I'll explain. #Ok I'll explain now in this commit. We're going every width elements, adding as many 0xFF as per new width. That's what the frame.tiles[i:i+aux_width] + [0xFF]*difference_width means. And then we're increasing i at steps of aux_width to make sure we make the insertions at that pace. And finally, we're adding the tiles (otherwise we get list of lists).
-        else: #Negative.
-            frame.tiles = [tile for row in (frame.tiles[i:i+new_width] for i in range(0, len(frame.tiles), aux_width)) for tile in row] #Complex, but give me a moment and I'll explain.
+        if frame_tiles is None:
+            self.load_new_width_value_difference_width(frame, difference_width, aux_width, new_width)
+        else:
+            frame.tiles = frame_tiles
         self.createanims.width_entry.delete(0, "end")
         self.createanims.width_entry.insert(0, str(new_width))
         self.decide_arrow_buttons_status(new_width, 60, self.createanims.width_left_arrow, self.createanims.width_right_arrow, lower_boundary=1)
         if refresh_UI_flag:
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
 
+    def load_new_width_value_difference_width(self, frame, difference_width, aux_width, new_width):
+        if difference_width >= 0: #Positive. #Changed my mind. Even if difference is zero, do perform updates. Helpful for the first time (it will still run and do the right thing).
+            frame.tiles = [tile for row in (frame.tiles[i:i+aux_width] + [0xFF]*difference_width for i in range(0, len(frame.tiles), aux_width)) for tile in row] #Complex, but give me a moment and I'll explain. #Ok I'll explain now in this commit. We're going every width elements, adding as many 0xFF as per new width. That's what the frame.tiles[i:i+aux_width] + [0xFF]*difference_width means. And then we're increasing i at steps of aux_width to make sure we make the insertions at that pace. And finally, we're adding the tiles (otherwise we get list of lists).
+        else: #Negative.
+            frame.tiles = [tile for row in (frame.tiles[i:i+new_width] for i in range(0, len(frame.tiles), aux_width)) for tile in row] #Complex, but give me a moment and I'll explain.
+
     def load_new_height(self, new_height, refresh_UI_flag=True):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         old_height = frame.metadata.y_length #I'm sticking to old this time around cause aux makes me think of something I'll use right away. But it's not the case here.
-        self.createanims.undo_redo.undo_redo([self.load_new_height_value, old_height, refresh_UI_flag, frame.tiles[:]], [self.load_new_height_value, new_height, refresh_UI_flag]) #frame.tiles[:] is super important because due to .extend used for higher height, the same reference is used so the newest frame.tiles is used instead of old. Could rewrite the extend to create new list of course and in fact I tested it and it works. But I prefer this. #Huh, I understand a bit better why it's such a classic to have stuff like name.name repeated like that. Well yes, it is repeated but those are different actions. Maybe I could say UndoRedoClass or UndoRedoObject but, yeah.
+        self.createanims.undo_redo.undo_redo([self.load_new_height_value, old_height, frame.tiles[:]], [self.load_new_height_value, new_height]) #frame.tiles[:] is super important because due to .extend used for higher height, the same reference is used so the newest frame.tiles is used instead of old. Could rewrite the extend to create new list of course and in fact I tested it and it works. But I prefer this. #Huh, I understand a bit better why it's such a classic to have stuff like name.name repeated like that. Well yes, it is repeated but those are different actions. Maybe I could say UndoRedoClass or UndoRedoObject but, yeah.
 
     def load_new_height_value(self, new_height, refresh_UI_flag=True, frame_tiles=None): #Frame tiles will be required for a more proper Undo. See, if we have height 10, now we go to height 5, and we undo back to 10, with this method we get 0xFF tiles in the spaces of difference. So, for an Undo, we'll also send the frame tiles, set the old height but we won't actually do any other math or calculation.
         self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -451,7 +472,12 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         else: #Negative.
             frame.tiles = [tile for tile in frame.tiles[0:(len(frame.tiles) - (frame.metadata.x_length*abs(difference_height)))]] #Details details. difference_height is negative here, so we need the abs for this trick to work. #So I was going to read everything row per row and stop at the new dimensions. Well I'm still doing that but now with just one for instead of two. I don't need the for i in this case. (so I was going to do something like for i in range(0, new_dimensions, width)).
 
-    def load_new_physics_id(self, new_physics_id):
+    def load_new_physics_id(self, new_physics_id, refresh_UI_flag=True):
+        anim = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim]
+        old_physics_id = anim.physics_id
+        self.createanims.undo_redo.undo_redo([self.load_new_physics_id_value, old_physics_id], [self.load_new_physics_id_value, new_physics_id])
+
+    def load_new_physics_id_value(self, new_physics_id):
         self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_physics_id = new_physics_id
         self.createanims.physics_id_entry.delete(0, "end")
@@ -466,25 +492,39 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 messagebox.showwarning(title="Physics ID Mismatch", message=f"Warning: Anim {self.createanims.current_anim:02d} has {len(anim.frame_ids)} frame(s) but assigned physics ID {self.createanims.current_physics_id:02d} has {len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2} pair(s). Please consider updating either one of them. If you leave it as it is, you might see inconsistencies in the ROM.\nOnce you're done with your changes, consider reloading the physics ID. If this dialog no longer appears, the issue has been solved :) . Yay!")
 
     def load_new_character(self, new_character, new_frame=0):
+        old_character = self.createanims.current_character
+        old_frame = self.createanims.current_frame #We do need this since suppose we updated frame to 2, then changed Characters, when going back to the previous Character, it'll be back to 0 and it can give the feeling that there was nothing undone. I mean if you, update frame ID to 1, then change, then undo two times, you won't see any change.
+        self.createanims.undo_redo.undo_redo([self.load_new_character_value, old_character, old_frame], [self.load_new_character_value, new_character])
+
+    def load_new_character_value(self, new_character, new_frame=0):
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_character = new_character
         self.createanims.character_entry.delete(0, "end")
         self.createanims.character_entry.insert(0, str(new_character))
         self.decide_arrow_buttons_status(new_character, len(self.createanims.characters) - 1, self.createanims.character_left_arrow, self.createanims.character_right_arrow)
-        self.load_new_anim(self.createanims.current_anim, new_frame) #We preserve anim. I find it useful if you want to compare how the same anim looks from one character to the other. Frame cannot really be preserved or... oh wait. It can. Every anim... or... oh no. No it can't. Some anims will definitely have same amount of frames. But not necessarily.
+        self.load_new_anim_value(self.createanims.current_anim, new_frame) #We preserve anim. I find it useful if you want to compare how the same anim looks from one character to the other. Frame cannot really be preserved or... oh wait. It can. Every anim... or... oh no. No it can't. Some anims will definitely have same amount of frames. But not necessarily.
 
     def load_new_anim(self, new_anim, new_frame=0):
+        old_anim = self.createanims.current_anim
+        old_frame = self.createanims.current_frame #Same logic as load_new_character.
+        self.createanims.undo_redo.undo_redo([self.load_new_anim_value, old_anim, old_frame], [self.load_new_anim_value, new_anim])
+
+    def load_new_anim_value(self, new_anim, new_frame=0):
         self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_anim = new_anim
         self.createanims.anim_entry.delete(0, "end")
         self.createanims.anim_entry.insert(0, str(new_anim))
         character = self.createanims.characters[self.createanims.current_character]
         self.decide_arrow_buttons_status(new_anim, len(character.anims) - 1, self.createanims.anim_left_arrow, self.createanims.anim_right_arrow)
-        self.load_new_physics_id(character.anims[self.createanims.current_anim].physics_id)
-        self.load_new_frame(new_frame, refresh_UI_flag=False) #We always start at the first frame of the anim. #But can be changed/adjusted. Very useful to keep editing the same frame after stop anim.
+        self.load_new_physics_id_value(character.anims[self.createanims.current_anim].physics_id)
+        self.load_new_frame_value(new_frame, refresh_UI_flag=False) #We always start at the first frame of the anim. #But can be changed/adjusted. Very useful to keep editing the same frame after stop anim.
         self.createanims.refresh_UI() #Potencial refactor: let load_new_chr_bank do the UI refresh. So don't pass flag anymore. And make sure to decide arrow status and stuff before loading new CHR bank. In theory, it shouldn't affect anything, if load runs last.
 
     def load_new_frame(self, new_frame, refresh_UI_flag=True):
+        old_frame = self.createanims.current_frame
+        self.createanims.undo_redo.undo_redo([self.load_new_frame_value, old_frame], [self.load_new_frame_value, new_frame])
+
+    def load_new_frame_value(self, new_frame, refresh_UI_flag=True):
         self.createanims.frame_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_frame = new_frame
         self.createanims.frame_entry.delete(0, "end")
@@ -494,12 +534,16 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         frame_id = character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame]
         if frame_id != self.createanims.current_frame_id: #Clear it only if they're actually different. Also has to happen here before load_new_frame_id overwrites it.
             self.createanims.current_anim_image_rectangle = None
-        self.load_new_frame_id(frame_id, refresh_UI_flag=False)
+        self.load_new_frame_id_value(frame_id, refresh_UI_flag=False)
         self.decide_arrow_buttons_status(new_frame, len(character.anims[self.createanims.current_anim].frame_ids) - 1, self.createanims.frame_left_arrow, self.createanims.frame_right_arrow)
         if refresh_UI_flag:
             self.createanims.refresh_UI()
 
     def load_new_frame_id(self, new_frame_id, refresh_UI_flag=True):
+        old_frame_id = self.createanims.current_frame_id
+        self.createanims.undo_redo.undo_redo([self.load_new_frame_id_value, old_frame_id], [self.load_new_frame_id_value, new_frame_id])
+
+    def load_new_frame_id_value(self, new_frame_id, refresh_UI_flag=True):
         self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_frame_id = new_frame_id
         self.createanims.frame_id_entry.delete(0, "end")
@@ -508,11 +552,11 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame] = new_frame_id
         self.createanims.current_frame_id = new_frame_id
         frame = character.frames[new_frame_id]
-        self.load_new_x_offset(frame.metadata.x_offset, refresh_UI_flag=False)
-        self.load_new_y_offset(frame.metadata.y_offset, refresh_UI_flag=False)
-        self.load_new_width(frame.metadata.x_length, refresh_UI_flag=False)
-        self.load_new_height(frame.metadata.y_length, refresh_UI_flag=False)
-        self.createanims.tile_utils.load_new_chr_bank(frame.metadata.chr_bank, refresh_UI_flag=False)
+        self.load_new_x_offset_value(frame.metadata.x_offset, refresh_UI_flag=False)
+        self.load_new_y_offset_value(frame.metadata.y_offset, refresh_UI_flag=False)
+        self.load_new_width_value(frame.metadata.x_length, refresh_UI_flag=False)
+        self.load_new_height_value(frame.metadata.y_length, refresh_UI_flag=False)
+        self.createanims.tile_utils.load_new_chr_bank_value(frame.metadata.chr_bank, refresh_UI_flag=False)
         self.decide_arrow_buttons_status(new_frame_id, len(character.frames) - 1, self.createanims.frame_id_left_arrow, self.createanims.frame_id_right_arrow)
         self.createanims.current_anim_image_rectangle = None
         if refresh_UI_flag:

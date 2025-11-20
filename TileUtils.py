@@ -386,7 +386,11 @@ class TileUtils:
         self.createanims.chr_info_text.configure(text="")
         return True
 
-    def load_new_chr_bank(self, new_chr_bank, refresh_UI_flag=True): #Could be get_new_chr_bank, but this time I feel more vibes towards load_new_chr_bank.
+    def load_new_chr_bank(self, new_chr_bank, refresh_UI_flag=True):
+        old_chr_bank = self.createanims.current_chr_bank
+        self.createanims.undo_redo.undo_redo([self.load_new_chr_bank_value, old_chr_bank], [self.load_new_chr_bank_value, new_chr_bank])
+
+    def load_new_chr_bank_value(self, new_chr_bank, refresh_UI_flag=True): #Could be get_new_chr_bank, but this time I feel more vibes towards load_new_chr_bank.
         self.createanims.chr_entry.configure(highlightcolor="white", highlightbackground="white") #We'll leave this here. If it was red, now it shouldn't be anymore since this 'gets it back on the right track'.
         self.createanims.chr_info_text.configure(text="")
         self.createanims.current_chr_bank = new_chr_bank
