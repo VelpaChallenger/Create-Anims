@@ -425,6 +425,11 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
 
     def load_new_height(self, new_height, refresh_UI_flag=True):
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        old_height = frame.metadata.y_length #I'm sticking to old this time around cause aux makes me think of something I'll use right away. But it's not the case here.
+        self.createanims.undo_redo.undo_redo([self.load_new_height_value, old_height, refresh_UI_flag], [self.load_new_height_value, new_height, refresh_UI_flag]) #Huh, I understand a bit better why it's such a classic to have stuff like name.name repeated like that. Well yes, it is repeated but those are different actions. Maybe I could say UndoRedoClass or UndoRedoObject but, yeah.
+
+    def load_new_height_value(self, new_height, refresh_UI_flag=True):
         self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         aux_height = frame.metadata.y_length #We'll need this to know the step, every how many tiles we'll do 0xFF insertion. We cannot use the new one as that'll give different stepping (we'll land elsewhere). We could also make this update later. But I like it more this way.

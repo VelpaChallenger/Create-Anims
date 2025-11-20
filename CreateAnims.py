@@ -9,6 +9,7 @@ from Command import *
 from EntryReturn import *
 from Anim import *
 from CreateAnimsButton import *
+from UndoRedo import *
 
 FONT = ("TkDefaultFont", 16)
 
@@ -35,6 +36,7 @@ class CreateAnims:
         self.entry_return = EntryReturn(self)
         self.anim = Anim(self)
         self.button = CreateAnimsButton(self)
+        self.undo_redo = UndoRedo(self)
         self.characters = []
         self.current_pal_rectangle = None
         self.current_color_picker_rectangle = None
@@ -266,6 +268,9 @@ class CreateAnims:
         self.edit_physics_button.pack(side="top", padx=(5, 2), pady=(5, 5))
 
         self.root.bind_all("<Button-1>", self.bind_all_focus)
+
+        self.root.bind("<Control-z>", self.undo_redo.undo)
+        self.root.bind("<Control-y>", self.undo_redo.redo)
 
     def make_styles(self):
         style = ttk.Style()
