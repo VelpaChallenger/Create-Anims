@@ -6,12 +6,16 @@ class UndoRedo:
         self.stack_ptr = 0 #Our index. Where are we in the stack?
 
     def undo(self, event=None): #func is the function, *args the arguments of said function. They can be of variable length, that will depend on the specific function.
+        if self.createanims.edit_menu.entrycget(0, 'state') == "disabled": #I prefer it this way really. If you can't do it from the UI, you shouldn't be able to do it with a keyboard shortcut either. This will be our common source in our case. #self.stack_ptr == 0: #Nothing to undo.
+            return
         undo = self.stack[self.stack_ptr][0] #node = stack[stack_ptr] #This was the thing. This doesn't return the undo per se, it returns the node.
         undo[0](*undo[1:]) #So now, node[0] is undo data. Therefore node[0][0] is func, node[0][1] is args. #And the args.
         self.stack_ptr -= 1 #We went backwards one step.
         self.decide_undo_redo_status()
 
     def redo(self, event=None): #This doesn't take arguments actually.
+        if self.createanims.edit_menu.entrycget(1, 'state') == "disabled":
+            return
         redo = self.stack[self.stack_ptr][1] #Funny. For redo I had indeed done it this way. Though it's 1 (there was 0 zero).
         redo[0](*redo[1:])
         self.stack_ptr += 1 #We advanced one step.
