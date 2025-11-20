@@ -427,23 +427,29 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def load_new_height(self, new_height, refresh_UI_flag=True):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         old_height = frame.metadata.y_length #I'm sticking to old this time around cause aux makes me think of something I'll use right away. But it's not the case here.
-        self.createanims.undo_redo.undo_redo([self.load_new_height_value, old_height, refresh_UI_flag], [self.load_new_height_value, new_height, refresh_UI_flag]) #Huh, I understand a bit better why it's such a classic to have stuff like name.name repeated like that. Well yes, it is repeated but those are different actions. Maybe I could say UndoRedoClass or UndoRedoObject but, yeah.
+        self.createanims.undo_redo.undo_redo([self.load_new_height_value, old_height, refresh_UI_flag, frame.tiles[:]], [self.load_new_height_value, new_height, refresh_UI_flag]) #frame.tiles[:] is super important because due to .extend used for higher height, the same reference is used so the newest frame.tiles is used instead of old. Could rewrite the extend to create new list of course and in fact I tested it and it works. But I prefer this. #Huh, I understand a bit better why it's such a classic to have stuff like name.name repeated like that. Well yes, it is repeated but those are different actions. Maybe I could say UndoRedoClass or UndoRedoObject but, yeah.
 
-    def load_new_height_value(self, new_height, refresh_UI_flag=True):
+    def load_new_height_value(self, new_height, refresh_UI_flag=True, frame_tiles=None): #Frame tiles will be required for a more proper Undo. See, if we have height 10, now we go to height 5, and we undo back to 10, with this method we get 0xFF tiles in the spaces of difference. So, for an Undo, we'll also send the frame tiles, set the old height but we won't actually do any other math or calculation.
         self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         aux_height = frame.metadata.y_length #We'll need this to know the step, every how many tiles we'll do 0xFF insertion. We cannot use the new one as that'll give different stepping (we'll land elsewhere). We could also make this update later. But I like it more this way.
         frame.metadata.y_length = new_height
         difference_height = new_height - aux_height
-        if difference_height >= 0: #Positive. #Changed my mind. Even if difference is zero, do perform updates. Helpful for the first time (it will still run and do the right thing).
-            frame.tiles.extend(([0xFF]*frame.metadata.x_length)*difference_height) #As many rows of 0xFF as per new height (and each row as long as per width).
-        else: #Negative.
-            frame.tiles = [tile for tile in frame.tiles[0:(len(frame.tiles) - (frame.metadata.x_length*abs(difference_height)))]] #Details details. difference_height is negative here, so we need the abs for this trick to work. #So I was going to read everything row per row and stop at the new dimensions. Well I'm still doing that but now with just one for instead of two. I don't need the for i in this case. (so I was going to do something like for i in range(0, new_dimensions, width)).
+        if frame_tiles is None:
+            self.load_new_height_value_difference_height(frame, difference_height)
+        else:
+            frame.tiles = frame_tiles
         self.createanims.height_entry.delete(0, "end")
         self.createanims.height_entry.insert(0, str(new_height))
         self.decide_arrow_buttons_status(new_height, 60, self.createanims.height_left_arrow, self.createanims.height_right_arrow, lower_boundary=1)
         if refresh_UI_flag:
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
+
+    def load_new_height_value_difference_height(self, frame, difference_height): #Cause I don't like much nesting right now.
+        if difference_height >= 0: #Positive. #Changed my mind. Even if difference is zero, do perform updates. Helpful for the first time (it will still run and do the right thing).
+            frame.tiles.extend(([0xFF]*frame.metadata.x_length)*difference_height) #As many rows of 0xFF as per new height (and each row as long as per width).
+        else: #Negative.
+            frame.tiles = [tile for tile in frame.tiles[0:(len(frame.tiles) - (frame.metadata.x_length*abs(difference_height)))]] #Details details. difference_height is negative here, so we need the abs for this trick to work. #So I was going to read everything row per row and stop at the new dimensions. Well I'm still doing that but now with just one for instead of two. I don't need the for i in this case. (so I was going to do something like for i in range(0, new_dimensions, width)).
 
     def load_new_physics_id(self, new_physics_id):
         self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
