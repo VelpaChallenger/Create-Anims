@@ -159,9 +159,9 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
             if self.createanims.in_play_anim: #Because in this case the select of a ColorPickerRectangle also implies selecting I mean rather updating the color of a PalRectangle, we need to have this check here. You will still be able to select the ColorPickerRectangle (a double left click or a right motion for TileImage doesn't imply select, that's why it can happen at the top, that's the difference, well at least for now when I do Shift+Click it might be different but yeah), but then you'll get the message *if* a PalRectangle would have been updated otherwise.
                 self.createanims.chr_info_text.configure(text="You're currently playing an anim. Please click on 'Stop Anim' before you continue with your edits.", fg="blue")
                 return
-            character_palette = self.createanims.characters[self.createanims.current_character].palette
-            character_palette[self.createanims.current_character_pal_index] = self.pal #Done! #We will need to store current_character_pal_index similarly to current_chr_tile_index for the refactor to fully work. And exactly, it's the exact same idea, the exact same reason: the relationship between the two. Between Anim and TileImage is same as ColorPickerRectangle and PalRectangle, like the more I think about it, the more literal it is.
-            self.createanims.refresh_UI() #Done! #This could be a refresh_UI. #Though in that case, I would need to do it the same way as Anim, and save coordinates of rectangle, then restore... or otherwise save outline... that's why I did it this way. But then I found a way with Anim so. Yeah, I could soon replicate it here, it might be part of what's making UndoRedo so complicated here.
+            old_index = self.createanims.current_character_pal_index #Same approach as Anim and CHR.
+            old_pal = self.createanims.characters[self.createanims.current_character].palette[old_index]
+            self.createanims.undo_redo.undo_redo([self.createanims.tile_utils.load_new_character_palette_for_index_value, old_index, old_pal], [self.createanims.tile_utils.load_new_character_palette_for_index_value, old_index, self.pal]) #I was thinking that maybe I don't need to pass index but... yes. Because, if I have, like, I changed two different indexes. Now I undo. I will check current_character_palette_index but it will give me the current one which... I mean it's kinda like when I update y_offset, I never pass the frame. I just take current_frame. But it's kinda different because there is an undo_redo for when you change frames, but there isn't one for when you change palette selected. Hoho. So that's the difference. (I think it'd be distracting, but if anyone asks, I can add it).
 
 class TileImage:
 
@@ -277,7 +277,7 @@ class TileUtils:
             rgb = f"#{r:02X}{g:02X}{b:02X}"
             pal_rectangle = self.createanims.character_palette_canvas.create_rectangle(initial_x, 0, initial_x + 31, 31, fill=rgb, outline=rgb, width=1)
             pal_rectangle_object = PalRectangle(self.createanims, self.createanims.character_palette_canvas, self.createanims.color_picker_rectangles[pal], pal_rectangle, i, pal, self.createanims.pal_label)
-            self.createanims.pal_rectangles[pal_rectangle] = pal_rectangle_object
+            self.createanims.pal_rectangles[pal_rectangle] = pal_rectangle_object #I think it's going to be a good idea to go back to the list approach and then do an append, and we can get the right object via the character_palette_index. Might be cool for stuff like navigating using the keyboard, we just increase/decrease the current character_palette_index, and with this it'll be a simpler select.
             initial_x += 32
         if self.createanims.current_pal_rectangle is not None:
             self.regenerate_pal_rectangles()
@@ -386,16 +386,11 @@ class TileUtils:
         x1, y1, x2, y2 = self.x1_outer, self.y1_outer, self.x2_outer, self.y2_outer
         self.createanims.current_pal_rectangle_outer_rectangle = self.createanims.character_palette_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")
 
-    def select_color_picker_rectangle_object(self, new_pal): #Now I got it! It's extremely similar to Anim and load_chr_bank here in TileUtils, but I don't see it as a bad thing. On the opposite, I'm glad and happy that I was able to find the reasons why it looked like it couldn't be done, and then finally, oh wait, yes, it can be done. Sure, events aren't triggered on buttons or returns but if you abstract that out, it is still the same. So beautiful.
-        if self.createanims.current_pal_rectangle is not None: #Otherwise, ignore the undo_redo operation.
-            old_pal = self.createanims.pal_rectangles[self.createanims.current_pal_rectangle].pal #self.createanims.color_picker_rectangles[self.pal] #I need the object. I'll add it in the variable name.
-            self.createanims.undo_redo.undo_redo([self.select_color_picker_rectangle_object_value, old_pal], [self.select_color_picker_rectangle_object_value, new_pal])
-        else: #else. Don't do both. Please. Thank you.
-            self.select_color_picker_rectangle_object_value(new_pal)
-
-    def select_color_picker_rectangle_object_value(self, new_pal): #object to differentiate it from the one used by PalRectangle. Quite literally, here we're selecting an object and then calling its own select. This will be the intermediary, instead of ColorPickerRectangle.object, which approach had a couple of issues. Mainly memory (if I keep reference, they won't be removed on refresh... didn't test it but it didn't look good), but also it was very hard to get the right object since rectangles don't know about other rectangles.
-        color_picker_rectangle_object = self.createanims.color_picker_rectangles[new_pal]
-        color_picker_rectangle_object.select()
+    def load_new_character_palette_for_index_value(self, character_pal_index, new_character_palette): #I'm still adding the value cause, yes there isn't a non_value in this case, it's different because this is happening as part of something else but, I still want to make it clear that this is included in an undo_redo. #That's the action itself and it can only happen if we're not playing an anim or, in general terms, if we pass the validations. This is the intermediary. A keyboard shortcut for example will run ColorPickerRectangle.select_and_update_pal_rectangle. Yes, I said it was going to be from TileUtils, but change of plans. This is good because, the ColorPickerRectangle will be selected, and if the PalRectangle update applies, it will be done as well, but otherwise it just won't. So it's great.
+        character_palette = self.createanims.characters[self.createanims.current_character].palette
+        character_palette[character_pal_index] = new_character_palette #Done! #We will need to store current_character_pal_index similarly to current_chr_tile_index for the refactor to fully work. And exactly, it's the exact same idea, the exact same reason: the relationship between the two. Between Anim and TileImage is same as ColorPickerRectangle and PalRectangle, like the more I think about it, the more literal it is.
+        self.createanims.pal_label.config(text=f"Palette: {new_character_palette:02X}") #Restored. #Technically not the pal_rectangle itself but I mean, still logically part of the same update. Same unit.
+        self.createanims.refresh_UI() #Done! #This could be a refresh_UI. #Though in that case, I would need to do it the same way as Anim, and save coordinates of rectangle, then restore... or otherwise save outline... that's why I did it this way. But then I found a way with Anim so. Yeah, I could soon replicate it here, it might be part of what's making UndoRedo so complicated here.
 
     def validate_chr_bank(self, new_value):
         if not new_value: #Empty value is always welcome.
