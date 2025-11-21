@@ -218,8 +218,10 @@ class TileImage:
         self.createanims.anim.refresh()
 
     def on_right_click_motion(self, event): #Not None anymore cause now I'm gonna use it.
-        if self.createanims.in_play_anim or not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
+        if self.createanims.in_play_anim:
             self.createanims.chr_info_text.configure(text="You're currently playing an anim. Please click on 'Stop Anim' before you continue with your edits.", fg="blue")
+            return
+        if not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
             return
         tile_row = event.y // 16
         tile_col = event.x // 16 #We only care about the integer part. >> 4 achieves same but, again this is more explicit for me.
