@@ -87,6 +87,8 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             old_index = self.anim_index
             frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
             old_tile = frame.tiles[self.anim_index] #I usually leave only old lines but... let's make an exception here for the sake of clarity.
+            if old_tile == self.createanims.current_chr_tile_index:
+                return
             self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_for_index_value, old_index, old_tile], [self.createanims.anim.load_new_tile_for_index_value, old_index, self.createanims.current_chr_tile_index])
 
 class PhysicsLabel:
@@ -402,6 +404,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def load_new_x_offset(self, new_x_offset, refresh_UI_flag=True):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         old_x_offset = frame.metadata.x_offset
+        if old_x_offset == new_x_offset:
+            return
         self.createanims.undo_redo.undo_redo([self.load_new_x_offset_value, old_x_offset], [self.load_new_x_offset_value, new_x_offset]) #On purpose we don't send refresh_UI_flag. The default True is fine in those cases.
 
     def load_new_x_offset_value(self, new_x_offset, refresh_UI_flag=True): #I'm also still thinking about the proposal of removing refresh_UI_flag. Considering that we may come from different sources, I'm thinking it might not be as good of an idea and maybe this will do. #I was a bit hesistant to do this, but hey, it will do undo/redo a lot more convenient. Pretty much every load has this benefit, I mean yeah every load.
@@ -416,6 +420,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def load_new_y_offset(self, new_y_offset, refresh_UI_flag=True):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         old_y_offset = frame.metadata.y_offset
+        if old_y_offset == new_y_offset:
+            return
         self.createanims.undo_redo.undo_redo([self.load_new_y_offset_value, old_y_offset], [self.load_new_y_offset_value, new_y_offset])
 
     def load_new_y_offset_value(self, new_y_offset, refresh_UI_flag=True): #I'm also still thinking about the proposal of removing refresh_UI_flag. Considering that we may come from different sources, I'm thinking it might not be as good of an idea and maybe this will do. #I was a bit hesistant to do this, but hey, it will do undo/redo a lot more convenient. Pretty much every load has this benefit, I mean yeah every load.
@@ -430,6 +436,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def load_new_width(self, new_width, refresh_UI_flag=True):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         old_width = frame.metadata.x_length #I'm sticking to old this time around cause aux makes me think of something I'll use right away. But it's not the case here.
+        if old_width == new_width:
+            return
         self.createanims.undo_redo.undo_redo([self.load_new_width_value, old_width, refresh_UI_flag, frame.tiles[:]], [self.load_new_width_value, new_width]) #Here we still send refresh_UI_flag cause I don't feel like using kwargs or something to pass frame_tiles but not refresh_UI_flag.
 
     def load_new_width_value(self, new_width, refresh_UI_flag=True, frame_tiles=None): #Yes... I don't really like that now we have two names for the same thing, width and x_length. But, I don't really like X length on the front end. So yes.
@@ -457,6 +465,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def load_new_height(self, new_height, refresh_UI_flag=True):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
         old_height = frame.metadata.y_length #I'm sticking to old this time around cause aux makes me think of something I'll use right away. But it's not the case here.
+        if old_height == new_height:
+            return
         self.createanims.undo_redo.undo_redo([self.load_new_height_value, old_height, frame.tiles[:]], [self.load_new_height_value, new_height]) #frame.tiles[:] is super important because due to .extend used for higher height, the same reference is used so the newest frame.tiles is used instead of old. Could rewrite the extend to create new list of course and in fact I tested it and it works. But I prefer this. #Huh, I understand a bit better why it's such a classic to have stuff like name.name repeated like that. Well yes, it is repeated but those are different actions. Maybe I could say UndoRedoClass or UndoRedoObject but, yeah.
 
     def load_new_height_value(self, new_height, refresh_UI_flag=True, frame_tiles=None): #Frame tiles will be required for a more proper Undo. See, if we have height 10, now we go to height 5, and we undo back to 10, with this method we get 0xFF tiles in the spaces of difference. So, for an Undo, we'll also send the frame tiles, set the old height but we won't actually do any other math or calculation.
@@ -484,6 +494,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def load_new_physics_id(self, new_physics_id, refresh_UI_flag=True):
         anim = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim]
         old_physics_id = anim.physics_id
+        if old_physics_id == new_physics_id:
+            return
         self.createanims.undo_redo.undo_redo([self.load_new_physics_id_value, old_physics_id], [self.load_new_physics_id_value, new_physics_id])
 
     def load_new_physics_id_value(self, new_physics_id):
@@ -502,6 +514,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def load_new_character(self, new_character, new_frame=0):
         old_character = self.createanims.current_character
+        if old_character == new_character:
+            return
         old_frame = self.createanims.current_frame #We do need this since suppose we updated frame to 2, then changed Characters, when going back to the previous Character, it'll be back to 0 and it can give the feeling that there was nothing undone. I mean if you, update frame ID to 1, then change, then undo two times, you won't see any change.
         self.createanims.undo_redo.undo_redo([self.load_new_character_value, old_character, old_frame], [self.load_new_character_value, new_character])
 
@@ -515,6 +529,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def load_new_anim(self, new_anim, new_frame=0):
         old_anim = self.createanims.current_anim
+        if old_anim == new_anim:
+            return
         old_frame = self.createanims.current_frame #Same logic as load_new_character.
         self.createanims.undo_redo.undo_redo([self.load_new_anim_value, old_anim, old_frame], [self.load_new_anim_value, new_anim])
 
@@ -531,6 +547,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def load_new_frame(self, new_frame, refresh_UI_flag=True):
         old_frame = self.createanims.current_frame
+        if old_frame == new_frame:
+            return
         self.createanims.undo_redo.undo_redo([self.load_new_frame_value, old_frame], [self.load_new_frame_value, new_frame])
 
     def load_new_frame_value(self, new_frame, refresh_UI_flag=True):
@@ -550,6 +568,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def load_new_frame_id(self, new_frame_id, refresh_UI_flag=True):
         old_frame_id = self.createanims.current_frame_id
+        if old_frame_id == new_frame_id:
+            return
         self.createanims.undo_redo.undo_redo([self.load_new_frame_id_value, old_frame_id], [self.load_new_frame_id_value, new_frame_id])
 
     def load_new_frame_id_value(self, new_frame_id, refresh_UI_flag=True):

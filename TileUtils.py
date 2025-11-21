@@ -161,6 +161,8 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
                 return
             old_index = self.createanims.current_character_pal_index #Same approach as Anim and CHR.
             old_pal = self.createanims.characters[self.createanims.current_character].palette[old_index]
+            if old_pal == self.pal:
+                return
             self.createanims.undo_redo.undo_redo([self.createanims.tile_utils.load_new_character_palette_for_index_value, old_index, old_pal], [self.createanims.tile_utils.load_new_character_palette_for_index_value, old_index, self.pal]) #I was thinking that maybe I don't need to pass index but... yes. Because, if I have, like, I changed two different indexes. Now I undo. I will check current_character_palette_index but it will give me the current one which... I mean it's kinda like when I update y_offset, I never pass the frame. I just take current_frame. But it's kinda different because there is an undo_redo for when you change frames, but there isn't one for when you change palette selected. Hoho. So that's the difference. (I think it'd be distracting, but if anyone asks, I can add it).
 
 class TileImage:
@@ -417,6 +419,8 @@ class TileUtils:
 
     def load_new_chr_bank(self, new_chr_bank, refresh_UI_flag=True):
         old_chr_bank = self.createanims.current_chr_bank
+        if old_chr_bank == new_chr_bank:
+            return
         self.createanims.undo_redo.undo_redo([self.load_new_chr_bank_value, old_chr_bank], [self.load_new_chr_bank_value, new_chr_bank])
 
     def load_new_chr_bank_value(self, new_chr_bank, refresh_UI_flag=True): #Could be get_new_chr_bank, but this time I feel more vibes towards load_new_chr_bank.
