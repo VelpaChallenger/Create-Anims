@@ -57,11 +57,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.anim_canvas.tag_bind(self.anim_image, "<Double-Button-3>", lambda event: func_AnimImage_on_double_right_click(createanims, anim_index, event))
 
     def on_left_click(self, event=None):
-        self.select()
-        if self.createanims.current_chr_tile_index is not None: #If there is some tile in the CHR window selected.
-            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #It could be a good idea to add a get_frame(). But you know, that's what most people do. I only do it if it's convenient. Here, this is just way clearer.
-            frame.tiles[self.anim_index] = self.createanims.current_chr_tile_index
-            self.createanims.anim.refresh()
+        self.select_and_update()
 
     def on_right_click(self, event=None):
         self.select()
@@ -84,6 +80,14 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             self.anim_canvas.moveto(self.createanims.current_anim_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
             self.anim_canvas.moveto(self.createanims.current_anim_image_inner_rectangle, x, y)
             self.anim_canvas.moveto(self.createanims.current_anim_image_outer_rectangle, x-2, y-2)
+
+    def select_and_update(self): #I was going to say select_and_update_anim_image but it's kinda redudant I think? We already are in AnimImage in this context, unlike ColorPickerRectangle which is updating a PalRectangle. This time, the update doesn't happen when you click on the TileImage, but on the AnimImage. That's why the difference. But the rest is the same. We still have both a select and a select_and and all that.
+        self.select() #Select
+        if self.createanims.current_chr_tile_index is not None: #And update. If applies. Same as TileUtils too. #If there is some tile in the CHR window selected.
+            old_index = self.anim_index
+            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+            old_tile = frame.tiles[self.anim_index] #I usually leave only old lines but... let's make an exception here for the sake of clarity.
+            self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_for_index_value, old_index, old_tile], [self.createanims.anim.load_new_tile_for_index_value, old_index, self.createanims.current_chr_tile_index])
 
 class PhysicsLabel:
 
@@ -389,6 +393,11 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             return False
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
+
+    def load_new_tile_for_index_value(self, anim_index, tile_index):
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #It could be a good idea to add a get_frame(). But you know, that's what most people do. I only do it if it's convenient. Here, this is just way clearer.
+        frame.tiles[anim_index] = tile_index
+        self.createanims.anim.refresh()
 
     def load_new_x_offset(self, new_x_offset, refresh_UI_flag=True):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
