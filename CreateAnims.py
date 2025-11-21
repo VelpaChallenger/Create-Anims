@@ -107,6 +107,7 @@ class CreateAnims:
         self.edit_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         self.edit_menu.add_command(label="Undo", command=self.undo_redo.undo, accelerator="Ctrl+Z", state="disabled")
         self.edit_menu.add_command(label="Redo", command=self.undo_redo.redo, accelerator="Ctrl+Y", state="disabled")
+        self.edit_menu.add_command(label="Switch UndoRedo branch", command=self.undo_redo.switch_branch_undo_redo, accelerator="Ctrl+Shift+Z", state="disabled")
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         anim_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         anim_menu.add_command(label="Toggle transparency", command=self.command.toggle_anim_transparency, accelerator="Shift+T") #We'll add a little 'anim' in the name for me. Yay.
@@ -275,6 +276,7 @@ class CreateAnims:
 
         self.root.bind("<Control-z>", self.undo_redo.undo)
         self.root.bind("<Control-y>", self.undo_redo.redo)
+        self.root.bind("<Control-Z>", self.undo_redo.switch_branch_undo_redo) #What? Control-Z? Don't you mean Control-Shift-z? Actually yes. But Shift-z means Z, so if you put Control-shift-z, it won't work.
 
     def make_styles(self):
         style = ttk.Style()

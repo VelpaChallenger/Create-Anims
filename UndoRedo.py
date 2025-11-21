@@ -4,6 +4,30 @@ class UndoRedo:
         self.createanims = createanims
         self.stack = [[None]] #Let's go with a list to start. #It starts with None because first is always undo, but there's nothing to undo, yet we need the space for the redo to work.
         self.stack_ptr = 0 #Our index. Where are we in the stack?
+        self.stack_copy = None #We'll use this to know whether we can actually switch branches.
+        self.stack_copy_ptr = 0
+
+    def switch_branch_undo_redo(self, event=None):
+        if self.createanims.edit_menu.entrycget(2, 'state') == "disabled": #Same, we'll check the status. #self.stack_copy is None: #We won't call undo. Undo will always pass parameters doing things its own way. We'll do things our way, so we'll have it in a different function here.
+            return
+        aux_refresh_UI = self.createanims.refresh_UI #Everything in Python is an object, so this works like butter. Or like... I mean butter is fine.
+        self.createanims.refresh_UI = lambda : None #Just don't do anything. For now.
+        while self.stack_ptr != self.stack_copy_ptr:
+            undo = self.stack[self.stack_ptr][0]
+            undo[0](*undo[1:])
+            self.stack_ptr -= 1 #Come to think of it, with the new approach of partially switching refresh_UI, I could use undo. Meh. Still, I wouldn't want to call decide_undo_redo_status.
+        self.createanims.refresh_UI = aux_refresh_UI #Sweet, smooth like cheese! Am I hungry maybe?
+        aux_stack = self.stack[:]
+        self.stack = self.stack_copy[:] #Now you can redo again as you please, yayyyyy.
+        self.stack_copy = aux_stack #Otherwise stack_copy would be overwritten before its time. Also ptrs are fine at this point so I'm not touching them.
+        self.createanims.refresh_UI() #Do call it now to draw with all the latest updates.
+        self.decide_undo_redo_status() #I do need to call it at this point otherwise I won't be able to redo in the new branch which is the whole point.
+
+    def copy_undo_redo(self): #We'll need a dedicated function. Let's do this. #Future me/someone I don't know asks details? copy.deepcopy doesn't work because Tkinter objects cannot be pickled. And we pretty much need that. Otherwise, the stack gets corrupted at self.stack[self.stack_ptr] due to the last pop and reinsertion before we jump back to the previous branch. So 5-10-15-20 then 5-8-11, you go back, now you get 5-8-15-20. Not what we want.
+        anim_undo_redo_list = [] #Brand.
+        for undo_redo in self.stack:
+            anim_undo_redo_list.append(undo_redo[:])
+        return anim_undo_redo_list
 
     def undo(self, event=None): #func is the function, *args the arguments of said function. They can be of variable length, that will depend on the specific function.
         if self.createanims.edit_menu.entrycget(0, 'state') == "disabled": #I prefer it this way really. If you can't do it from the UI, you shouldn't be able to do it with a keyboard shortcut either. This will be our common source in our case. #self.stack_ptr == 0: #Nothing to undo.
@@ -22,9 +46,11 @@ class UndoRedo:
         self.decide_undo_redo_status()
 
     def undo_redo(self, undo, redo): #When you perform an action... ah right, the same function is going to be called. So there are a few details to keep in mind. I got this. #Yeah maybe, the function that we pass is not recursive, that is, we create an additional layer. Looks like huge work, but it could work pretty good. It seems reasonable yet at this stage. And if not, perhaps it could be automated somehow. You know, like moving directories and stuff like that. I don't see it very often but that doesn't mean it can't be done. I think it works very well in a lot of situations. Let's do this.
-        self.stack = self.stack[:self.stack_ptr+1] #Clear all the redo.
-        if len(self.stack[self.stack_ptr]) == 2: #Oh well whatever. Pop only returns default None for dictionaries, not for lists.
+        if len(self.stack[self.stack_ptr]) == 2: #This needs to happen first, otherwise self.stack already lost its previous state. #Oh well whatever. Pop only returns default None for dictionaries, not for lists.
+            self.stack_copy = self.copy_undo_redo() #self.stack[:] #And this also needs to happen first, before we pop. #We'll need this for the switch_branch_undo_redo functionality feature. #But only do it if a different branch was created. Seems clearer to me that way (I don't think there are performance differences).
+            self.stack_copy_ptr = self.stack_ptr
             self.stack[self.stack_ptr].pop(1) #If there is currently a redo, remove it. There are no more references to old data.
+        self.stack = self.stack[:self.stack_ptr+1] #Clear all the redo.
         self.stack[self.stack_ptr].append(redo) #Here we do want an append. #Where we are, add the redo.
         redo[0](*redo[1:]) #And, very important, do perform the action.
         self.stack_ptr += 1
@@ -41,3 +67,7 @@ class UndoRedo:
             self.createanims.edit_menu.entryconfigure("Undo", state="disabled")
         else:
             self.createanims.edit_menu.entryconfigure("Undo", state="normal")
+        if self.stack_copy is None or self.stack_ptr < self.stack_copy_ptr: #If we're behind, we don't have any common base. Yeah like merge base. Technically the merge base would be the very start but that's not point of the feature. The point is, I was redoing stuff, and accidentally clicked something, pressed something. Oh no! I lost my work! Nope, don't panic! Switch branches. There you go! You've recovered your work!
+            self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="disabled")
+        else:
+            self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="normal")
