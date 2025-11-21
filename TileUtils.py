@@ -138,6 +138,9 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         self.color_picker_canvas.tag_bind(self.color_picker_rectangle, "<Button-1>", self.on_left_click)
 
     def on_left_click(self, event=None):
+        self.createanims.tile_utils.select_color_picker_rectangle_object(self.pal) #self.select() #Just in case. If we happened to have other sources like keyboard shortcuts or menu options or whatever, I want them to be like EntryReturn and CreateAnimButton, they call an intermediary and then the intermediary sets the undo_redo.
+
+    def select(self): #The common point after all updates is TileUtils.select_color_picker_rectangle_object, the rest of the logic still applies (so keyboard for example can calculate new self.pal). #Now this is the common point. A keyboard shortcut can call this select and it'll get the same behavior. Keyboard arrows could also help navigate between color pickers, so before select, we determine the ColorPickerRectangle, and then we call its select method. It's wonderful, wonderfully beautiful. #Got it now! #Let's follow same approach as Anim and TileUtils I mean we already are in TileUtils, I mean for load_chr_bank specifically.
         if self.createanims.in_play_anim:
             self.createanims.chr_info_text.configure(text="You're currently playing an anim. Please click on 'Stop Anim' before you continue with your edits.", fg="blue")
             return
@@ -147,7 +150,7 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         self.color_picker_canvas.itemconfig(self.color_picker_rectangle, outline="blue")
         self.createanims.current_color_picker_rectangle = self.color_picker_rectangle
         self.update_pal_rectangle()
-        self.createanims.tile_utils.refresh_chr()
+        self.createanims.tile_utils.refresh_chr() #This could be a refresh_UI. #Though in that case, I would need to do it the same way as Anim, and save coordinates of rectangle, then restore... or otherwise save outline... that's why I did it this way. But then I found a way with Anim so. Yeah, I could soon replicate it here, it might be part of what's making UndoRedo so complicated here.
         self.createanims.anim.refresh()
 
     def update_pal_rectangle(self):
@@ -363,6 +366,17 @@ class TileUtils:
     def clear_in_motion(self):
         for tile_image in self.createanims.tiles_images: #tile_images but... whatever. Let's leave tiles_images.
             tile_image.in_motion = False
+
+    def select_color_picker_rectangle_object(self, new_pal): #Now I got it! It's extremely similar to Anim and load_chr_bank here in TileUtils, but I don't see it as a bad thing. On the opposite, I'm glad and happy that I was able to find the reasons why it looked like it couldn't be done, and then finally, oh wait, yes, it can be done. Sure, events aren't triggered on buttons or returns but if you abstract that out, it is still the same. So beautiful.
+        if self.createanims.current_pal_rectangle is not None: #Otherwise, ignore the undo_redo operation.
+            old_pal = self.createanims.pal_rectangles[self.createanims.current_pal_rectangle].pal #self.createanims.color_picker_rectangles[self.pal] #I need the object. I'll add it in the variable name.
+            self.createanims.undo_redo.undo_redo([self.select_color_picker_rectangle_object_value, old_pal], [self.select_color_picker_rectangle_object_value, new_pal])
+        else: #else. Don't do both. Please. Thank you.
+            self.select_color_picker_rectangle_object_value(new_pal)
+
+    def select_color_picker_rectangle_object_value(self, new_pal): #object to differentiate it from the one used by PalRectangle. Quite literally, here we're selecting an object and then calling its own select. This will be the intermediary, instead of ColorPickerRectangle.object, which approach had a couple of issues. Mainly memory (if I keep reference, they won't be removed on refresh... didn't test it but it didn't look good), but also it was very hard to get the right object since rectangles don't know about other rectangles.
+        color_picker_rectangle_object = self.createanims.color_picker_rectangles[new_pal]
+        color_picker_rectangle_object.select()
 
     def validate_chr_bank(self, new_value):
         if not new_value: #Empty value is always welcome.
