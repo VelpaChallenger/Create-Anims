@@ -118,11 +118,21 @@ class PhysicsLabel:
 
     def remove(self):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        if len(physics) == 3: #Then don't do it. Actually, do do it, but don't add it to UndoRedo. This to trigger the messagebox.
+            self.createanims.anim.remove_physics_column_value(self.frame_index)
+            return
         x_physics = physics[2*self.frame_index] #This is not for display, so we don't need to call calculate_physics.
         y_physics = physics[(2*self.frame_index) + 1]
         self.createanims.undo_redo.undo_redo([self.createanims.anim.insert_physics_column_value, self.frame_index, x_physics, y_physics], [self.createanims.anim.remove_physics_column_value, self.frame_index])
 
     def insert(self):
+        physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        if (len(physics) // 2) == 60:
+            self.createanims.physics_window.attributes('-disabled', 1)
+            messagebox.showinfo(title="Too many frames", message="The anim may be long, but I still have to put a limit to it. Anyways, if you do need more frames, let me know!")
+            self.createanims.physics_window.attributes('-disabled', 0)
+            self.createanims.physics_window.focus_force()
+            return
         self.createanims.undo_redo.undo_redo([self.createanims.anim.remove_physics_column_value, self.frame_index + 1], [self.createanims.anim.insert_physics_column_value, self.frame_index + 1])
 
 class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of it. #Similar structure to TileUtils. You have the main class, which then uses data from other classes to do its stuff.
@@ -523,12 +533,6 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def insert_physics_column_value(self, frame_index, x_physics=0x00, y_physics=0x00):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
-        if (len(physics) // 2) == 60:
-            self.createanims.physics_window.attributes('-disabled', 1)
-            messagebox.showinfo(title="Too many frames", message="The anim may be long, but I still have to put a limit to it. Anyways, if you do need more frames, let me know!")
-            self.createanims.physics_window.attributes('-disabled', 0)
-            self.createanims.physics_window.focus_force()
-            return
         physics.insert((2*frame_index), y_physics) #You may think this won't work when inserting at the end, but it does. Why? Because, 2*self.frame_index returns the x of the last physics. And that's the key. Exactly +2 after that, there's the 0x80. So you're inserting where 0x80 is, pushing 0x80.
         physics.insert((2*frame_index), x_physics) #What, inverted? Yes. I think you could also do +1 first and it would work? But I like more this.
         self.fill_physics_grid()
