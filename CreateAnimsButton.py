@@ -114,5 +114,5 @@ class CreateAnimsButton:
         self.createanims.stop_anim_button.configure(state="disabled")
         self.createanims.in_play_anim = False
 
-    def edit_physics_button(self, event=None):
-        self.createanims.init_physics_window() #All UI related is always CreateAnims.
+    def edit_physics_button(self, event=None): #Actually yes, it would be ideal if those too had an extra layer, so that, same as always, no matter button, keyboard shortcut or whatever, we still get to the same intermediary.
+        self.createanims.undo_redo.undo_redo([self.createanims.destroy_physics_window], [self.createanims.init_physics_window]) #Usually CreateAnims doesn't do... but this time it will. I like it.

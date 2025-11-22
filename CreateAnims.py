@@ -345,6 +345,9 @@ class CreateAnims:
         self.root.attributes('-disabled', 0)
         self.root.focus_force()
 
+    def destroy_physics_window(self): #Won't do anything if it's already destroyed (aka i.e. when X button was pressed.).
+        self.physics_window.destroy() #Puff! Gone! (used for Undo)
+
     def init_physics_dialog(self, frame_index): #Technically a window, but yeah, a dialog.
         self.physics_dialog = tkinter.Toplevel(self.root)
         self.physics_dialog.title(f"Update X and Y Physics for Frame {frame_index:02d}")
