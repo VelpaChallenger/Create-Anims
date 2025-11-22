@@ -8,20 +8,40 @@ class UndoRedo:
         self.stack_copy_ptr = 0
 
     def switch_branch_undo_redo(self, event=None):
-        if self.createanims.edit_menu.entrycget(2, 'state') == "disabled": #Same, we'll check the status. #self.stack_copy is None: #We won't call undo. Undo will always pass parameters doing things its own way. We'll do things our way, so we'll have it in a different function here.
+        if self.createanims.edit_menu.entrycget(2, 'state') == "disabled": #Won't use it after all. It still works. #If in physics_window, we won't care about that status. #Same, we'll check the status. #self.stack_copy is None: #We won't call undo. Undo will always pass parameters doing things its own way. We'll do things our way, so we'll have it in a different function here.
             return
         aux_refresh_UI = self.createanims.refresh_UI #Everything in Python is an object, so this works like butter. Or like... I mean butter is fine.
+        aux_anim_fill_physics_grid = self.createanims.anim.fill_physics_grid
+        self.createanims.anim.fill_physics_grid = lambda : None
         self.createanims.refresh_UI = lambda : None #Just don't do anything. For now.
+        init_physics_window_flag = False
+        destroy_physics_window_flag = False
         while self.stack_ptr != self.stack_copy_ptr:
             undo = self.stack[self.stack_ptr][0]
-            undo[0](*undo[1:])
+            if undo[0].__name__ == "init_physics_window": #How about this huh? Do you like it? You want some init, I'll give you some init! #self.createanims.init_physics_window = lambda : None #I guess maybe there is some sort of copy being used? Well no matter. I have more tricks under my sleeve.
+                init_physics_window_flag = True
+                destroy_physics_window_flag = False
+            elif undo[0].__name__ == "destroy_physics_window":
+                init_physics_window_flag = False
+                destroy_physics_window_flag = True #You might think this is redundant, but it's not. What if the init_physics_window_flag was in False because of the default? How can you distinguish and disambiguate between the two scenarios? flag in False because of a destroy, or because of a default? This one unties (or breaks the tie).
+            else:
+                undo[0](*undo[1:])
             self.stack_ptr -= 1 #Come to think of it, with the new approach of partially switching refresh_UI, I could use undo. Meh. Still, I wouldn't want to call decide_undo_redo_status.
+        if self.createanims.in_physics_window:
+            init_physics_window_flag = False #Even if the algorithm says 'True'. (I mean the chain of Undo in the stack). If anything, we may have to destroy, but never init if we're already in physics window.
         self.createanims.refresh_UI = aux_refresh_UI #Sweet, smooth like cheese! Am I hungry maybe?
+        self.createanims.anim.fill_physics_grid = aux_anim_fill_physics_grid
         aux_stack = self.stack[:]
         self.stack = self.stack_copy[:] #Now you can redo again as you please, yayyyyy.
         self.stack_copy = aux_stack #Otherwise stack_copy would be overwritten before its time. Also ptrs are fine at this point so I'm not touching them.
         self.createanims.refresh_UI() #Do call it now to draw with all the latest updates.
         self.decide_undo_redo_status() #I do need to call it at this point otherwise I won't be able to redo in the new branch which is the whole point.
+        if self.createanims.in_physics_window and not init_physics_window_flag:
+            self.createanims.anim.fill_physics_grid() #So, don't draw it (don't init) but do update it because we're currently there. And well actually, to avoid doing it twice, only do it if flag was False.
+        if destroy_physics_window_flag:
+            self.createanims.destroy_physics_window()
+        if init_physics_window_flag:
+            self.createanims.init_physics_window() #Always, always at the end.
 
     def copy_undo_redo(self): #We'll need a dedicated function. Let's do this. #Future me/someone I don't know asks details? copy.deepcopy doesn't work because Tkinter objects cannot be pickled. And we pretty much need that. Otherwise, the stack gets corrupted at self.stack[self.stack_ptr] due to the last pop and reinsertion before we jump back to the previous branch. So 5-10-15-20 then 5-8-11, you go back, now you get 5-8-15-20. Not what we want.
         anim_undo_redo_list = [] #Brand.

@@ -52,6 +52,7 @@ class CreateAnims:
         self.physics_directory = None
         self.png_img = []
         self.in_play_anim = False
+        self.in_physics_window = False
         self.physics_list = []
 
     def init_anim_window(self):
@@ -319,6 +320,7 @@ class CreateAnims:
                 pal_index += 1
 
     def init_physics_window(self): #Probably will have a destroy as well? In case of Ok/Cancel.
+        self.in_physics_window = True #We will use it after all!
         self.physics_window = tkinter.Toplevel(self.root)
         self.physics_window.title("Create Anims Physics Manager") #Sometimes dreams come true! Believe in them!
         self.physics_window.geometry(f"{PHYSICS_WIDTH}x{PHYSICS_HEIGHT}+{PHYSICS_INITIAL_X}+{PHYSICS_INITIAL_Y}")
@@ -329,6 +331,7 @@ class CreateAnims:
         self.physics_window.bind("<Control-z>", self.undo_redo.undo)
         self.physics_window.bind("<Control-y>", self.undo_redo.redo)
         self.physics_window.bind("<Control-Z>", self.undo_redo.switch_branch_undo_redo)
+        self.physics_window.protocol("WM_DELETE_WINDOW", self.on_physics_window_x)
 
         self.physics_graphics_canvas = tkinter.Canvas(self.physics_window, bd=0, highlightthickness=0, bg="white", width=256, height=100)
         self.physics_graphics_canvas.pack(side="top", fill="both", expand=True)
@@ -344,9 +347,13 @@ class CreateAnims:
         self.physics_canvas.configure(xscrollcommand=hbar.set) #One will always have a configure. canvas needs hbar for the scrollcommand. hbar needs the canvas for the command.
         hbar.pack(side="top", fill="x")
         self.anim.fill_physics_grid() #Changed my mind. The creation itself will happen here, then here we'll fill the values. #Physics grid is not predetermined. So, Anim will take things from here. CreateAnims has more to do with UI init stuff. The more low level stuff if you will.
-        self.root.wait_window(self.physics_window) # pause anything on the main window until this one closes
+        self.root.wait_window(self.physics_window)
+        self.in_physics_window = False
         self.root.attributes('-disabled', 0)
         self.root.focus_force()
+
+    def on_physics_window_x(self): #Specifically, the X button was pressed. Let's consider this an UndoRedo too.
+        self.undo_redo.undo_redo([self.init_physics_window], [self.destroy_physics_window])
 
     def destroy_physics_window(self): #Won't do anything if it's already destroyed (aka i.e. when X button was pressed.).
         self.physics_window.destroy() #Puff! Gone! (used for Undo)
