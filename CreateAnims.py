@@ -326,6 +326,9 @@ class CreateAnims:
         self.physics_window.transient(self.root) # set to be on top of the main window
         self.physics_window.grab_set() # hijack all commands from the master (clicks on the main window are ignored)
         self.physics_window.focus_force()
+        self.physics_window.bind("<Control-z>", self.undo_redo.undo)
+        self.physics_window.bind("<Control-y>", self.undo_redo.redo)
+        self.physics_window.bind("<Control-Z>", self.undo_redo.switch_branch_undo_redo)
 
         self.physics_graphics_canvas = tkinter.Canvas(self.physics_window, bd=0, highlightthickness=0, bg="white", width=256, height=100)
         self.physics_graphics_canvas.pack(side="top", fill="both", expand=True)

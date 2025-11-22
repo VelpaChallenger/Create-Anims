@@ -108,25 +108,22 @@ class PhysicsLabel:
         self.label.bind("<Shift-Button-1>", self.on_shift_left_click)
 
     def on_right_click(self, event=None):
-        physics = self.createanims.physics_list[self.createanims.current_physics_id]
-        physics.pop(2*self.frame_index) #And that's it.
-        physics.pop(2*self.frame_index) #Well two times to account also for the Y. And yeah, everything gets shifted when doing pop so this works.
-        self.createanims.anim.fill_physics_grid() #Kinda like a refresh, but for physics.
+        self.remove()
 
     def on_shift_right_click(self, event=None):
-        physics = self.createanims.physics_list[self.createanims.current_physics_id]
-        if (len(physics) // 2) == 60:
-            self.createanims.physics_window.attributes('-disabled', 1)
-            messagebox.showinfo(title="Too many frames", message="The anim may be long, but I still have to put a limit to it. Anyways, if you do need more frames, let me know!")
-            self.createanims.physics_window.attributes('-disabled', 0)
-            self.createanims.physics_window.focus_force()
-            return
-        physics.insert((2*self.frame_index) + 2, 0x00) #You may think this won't work when inserting at the end, but it does. Why? Because, 2*self.frame_index returns the x of the last physics. And that's the key. Exactly +2 after that, there's the 0x80. So you're inserting where 0x80 is, pushing 0x80.
-        physics.insert((2*self.frame_index) + 2, 0x00)
-        self.createanims.anim.fill_physics_grid()
+        self.insert()
 
     def on_shift_left_click(self, event=None):
         self.createanims.init_physics_dialog(self.frame_index)
+
+    def remove(self):
+        physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        x_physics = physics[2*self.frame_index] #This is not for display, so we don't need to call calculate_physics.
+        y_physics = physics[(2*self.frame_index) + 1]
+        self.createanims.undo_redo.undo_redo([self.createanims.anim.insert_physics_column_value, self.frame_index, x_physics, y_physics], [self.createanims.anim.remove_physics_column_value, self.frame_index])
+
+    def insert(self):
+        self.createanims.undo_redo.undo_redo([self.createanims.anim.remove_physics_column_value, self.frame_index + 1], [self.createanims.anim.insert_physics_column_value, self.frame_index + 1])
 
 class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of it. #Similar structure to TileUtils. You have the main class, which then uses data from other classes to do its stuff.
 
@@ -517,6 +514,24 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             self.play_physics = False
             if not self.createanims.in_play_anim: #Don't show it when restarting due to Stop Anim.
                 messagebox.showwarning(title="Physics ID Mismatch", message=f"Warning: Anim {self.createanims.current_anim:02d} has {len(anim.frame_ids)} frame(s) but assigned physics ID {self.createanims.current_physics_id:02d} has {len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2} pair(s). Please consider updating either one of them. If you leave it as it is, you might see inconsistencies in the ROM.\nOnce you're done with your changes, consider reloading the physics ID. If this dialog no longer appears, the issue has been solved :) . Yay!")
+
+    def remove_physics_column_value(self, frame_index):
+        physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        physics.pop(2*frame_index) #And that's it.
+        physics.pop(2*frame_index) #Well two times to account also for the Y. And yeah, everything gets shifted when doing pop so this works.
+        self.fill_physics_grid() #Kinda like a refresh, but for physics.
+
+    def insert_physics_column_value(self, frame_index, x_physics=0x00, y_physics=0x00):
+        physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        if (len(physics) // 2) == 60:
+            self.createanims.physics_window.attributes('-disabled', 1)
+            messagebox.showinfo(title="Too many frames", message="The anim may be long, but I still have to put a limit to it. Anyways, if you do need more frames, let me know!")
+            self.createanims.physics_window.attributes('-disabled', 0)
+            self.createanims.physics_window.focus_force()
+            return
+        physics.insert((2*frame_index), y_physics) #You may think this won't work when inserting at the end, but it does. Why? Because, 2*self.frame_index returns the x of the last physics. And that's the key. Exactly +2 after that, there's the 0x80. So you're inserting where 0x80 is, pushing 0x80.
+        physics.insert((2*frame_index), x_physics) #What, inverted? Yes. I think you could also do +1 first and it would work? But I like more this.
+        self.fill_physics_grid()
 
     def load_new_character(self, new_character, new_frame=0):
         old_character = self.createanims.current_character
