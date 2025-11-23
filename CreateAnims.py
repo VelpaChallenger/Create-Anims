@@ -359,9 +359,7 @@ class CreateAnims:
         self.physics_window.destroy() #Puff! Gone! (used for Undo)
 
     def init_physics_dialog(self, frame_index): #Technically a window, but yeah, a dialog.
-        self.edit_menu.entryconfigure("Undo", state="disabled") #You cannot undo or redo anything here. Not until you enter your values or close the window without any ado.
-        self.edit_menu.entryconfigure("Redo", state="disabled")
-        self.edit_menu.entryconfigure("Switch UndoRedo branch", state="disabled")
+        self.disable_undo_redo()
         self.physics_dialog = tkinter.Toplevel(self.root)
         self.physics_dialog.title(f"Update X and Y Physics for Frame {frame_index:02d}")
         self.physics_dialog.geometry(f"300x100+665+300") #Whatever.
@@ -400,6 +398,11 @@ class CreateAnims:
         self.undo_redo.decide_undo_redo_status() #Actually, only if they should be reenabled. Leave them at the state they should. Presumably, Undo should be enabled and Redo not, but, this logic will decide. #You can undo and redo again.
         self.physics_window.attributes('-disabled', 0)
         self.physics_window.focus_force()
+
+    def disable_undo_redo(self): #Also, I understand it may be counterintuitive for this to be in CreateAnims but status to be in UndoRedo? But it makes sense to me. Here we're plain disabling for the init of a window which is part of CreateAnims.
+        self.edit_menu.entryconfigure("Undo", state="disabled") #Ya know what, yes, I'll make it a method and I just call the method. #You cannot undo or redo anything here. Not until you enter your values or close the window without any ado.
+        self.edit_menu.entryconfigure("Redo", state="disabled")
+        self.edit_menu.entryconfigure("Switch UndoRedo branch", state="disabled")
 
     def refresh_UI(self): #This will be part of CreateAnims. All directly UI-related, idea is that it's here. Maybe not the technical like more specific code per se, but at least the highest layer.
         self.tile_utils.refresh_palette() #Changed my mind, will be part of a refresh/update UI.
