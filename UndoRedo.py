@@ -1,8 +1,18 @@
 function_name_translation_dict = { #Given a function name, what will we show in the UI?
-    "load_new_anim_value": ("Navigated anim", "Navigation"), #I like the idea. Have a setting that shows both navigation and changes, and another that shows only changes, stuff like that.
-    "load_new_frame_value": ("Navigated frame in anim", "Navigation"),
-    "load_new_frame_id_value": ("Changed frame ID in frame in anim", "Change"), #This could be a nice scenario for format strings but not the f ones, the ones that allow for replacing/formatting later on.
+    "load_new_anim_value": ("Character {0}. Navigated from anim {1:02d} to anim {2:02d}.", "Navigation", ("character_name", "undo:0", "redo:0")), #I like the idea. Have a setting that shows both navigation and changes, and another that shows only changes, stuff like that.
+    "load_new_frame_value": ("Character {0}. Navigated from frame {1:02d} to frame {2:02d} in anim {3:02d}.", "Navigation", ("character_name", "undo:0", "redo:0", "anim")),
+    "load_new_frame_id_value": ("Character {0}. Changed frame ID from {1:02d} to {2:02d} for frame {3:02d} in anim {4:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame", "anim")), #This could be a nice scenario for format strings but not the f ones, the ones that allow for replacing/formatting later on.
 }
+
+class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.
+
+    def __init__(self, createanims): #There'll be many instances of this (one per new activity), so let's make it __init__ (I was thinking of class without instance, but I generally don't use them, usually prefer using modules for that kinda stuff and such).
+        self.character = createanims.current_character
+        self.character_name = createanims.characters[self.character].name
+        self.anim = createanims.current_anim
+        self.frame = createanims.current_frame
+        self.frame_id = createanims.current_frame_id
+        self.physics_id = createanims.current_physics_id
 
 class UndoRedo:
 
@@ -16,6 +26,7 @@ class UndoRedo:
         self.trace = []
         self.amount_changes = 0 #Also, to understand why/how it works, think of it as a ptr of sorts. It makes it a lot easier to understand. #Not anymore! I never liked it in the first place. I like this a lot more. #self.unsaved_changes = False #We'll use this instead because we need to differentiate changes from navigation. I still think that, maybe, it would be better to have two completely different implementations, and that UndoRedo only refers to changes. But I'm not fully convinced of the implications at UI level, experience and whatnot. So I'm giving a try to this approach.
         self.saved = False #True, I agree. Those are different things. self.strack_ptr I mean self.stack_ptr == 0 doesn't imply not saved, and != 0 doesn't imply saved. Saved is something that literally means that: a save happened. It is not related to the stack_ptr. In other words, yes, after you save, you can have either Unsaved changes or Saved, meaning there was at least one save.
+        self.log_history = "" #Will have to be a text. Will make it easier to generate the corresponding label.
 
     def switch_branch_undo_redo(self, event=None):
         if self.createanims.edit_menu.entrycget(2, 'state') == "disabled": #Won't use it after all. It still works. #If in physics_window, we won't care about that status. #Same, we'll check the status. #self.stack_copy is None: #We won't call undo. Undo will always pass parameters doing things its own way. We'll do things our way, so we'll have it in a different function here.
@@ -36,11 +47,14 @@ class UndoRedo:
                 destroy_physics_window_flag = True #You might think this is redundant, but it's not. What if the init_physics_window_flag was in False because of the default? How can you distinguish and disambiguate between the two scenarios? flag in False because of a destroy, or because of a default? This one unties (or breaks the tie).
             else:
                 undo[0](*undo[1:])
-            self.stack_ptr -= 1 #Come to think of it, with the new approach of partially switching refresh_UI, I could use undo. Meh. Still, I wouldn't want to call decide_undo_redo_status.
             function_undo = undo[0]
-            undo_type = self.get_function_type(function_undo) #Done, I love it. #I might encapsulate this in a method yeah. get_function_type. It can Unknown, Navigation or Change. Beautiful.
+            undo_type, name_UI = self.get_function_type(function_undo) #Done, I love it. #I might encapsulate this in a method yeah. get_function_type. It can Unknown, Navigation or Change. Beautiful.
+            snapshot = self.stack[self.stack_ptr - 1][2]
+            redo = self.stack[self.stack_ptr - 1][1]
+            self.log_history += "- Switch Branch: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
             if undo_type == "Change":
                 self.amount_changes -= 1
+            self.stack_ptr -= 1 #Come to think of it, with the new approach of partially switching refresh_UI, I could use undo. Meh. Still, I wouldn't want to call decide_undo_redo_status.
         if self.createanims.in_physics_window:
             init_physics_window_flag = False #Even if the algorithm says 'True'. (I mean the chain of Undo in the stack). If anything, we may have to destroy, but never init if we're already in physics window.
         self.createanims.refresh_UI = aux_refresh_UI #Sweet, smooth like cheese! Am I hungry maybe?
@@ -68,7 +82,10 @@ class UndoRedo:
             return
         undo = self.stack[self.stack_ptr][0] #node = stack[stack_ptr] #This was the thing. This doesn't return the undo per se, it returns the node.
         function_undo = undo[0]
-        undo_type = self.get_function_type(function_undo) #Done, I love it. #I might encapsulate this in a method yeah. get_function_type. It can Unknown, Navigation or Change. Beautiful.
+        undo_type, name_UI = self.get_function_type(function_undo) #Done, I love it. #I might encapsulate this in a method yeah. get_function_type. It can Unknown, Navigation or Change. Beautiful.
+        snapshot = self.stack[self.stack_ptr - 1][2] #We want the snapshot taken at the previous step. #self.stack[self.stack_ptr][2] #Oh right, it's actually this. #More like an undo_redo technically speaking.
+        redo = self.stack[self.stack_ptr - 1][1]
+        self.log_history += "- Undo: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
         if undo_type == "Change":
             self.amount_changes -= 1
         self.stack_ptr -= 1 #We went backwards one step.
@@ -80,7 +97,10 @@ class UndoRedo:
             return
         redo = self.stack[self.stack_ptr][1] #Funny. For redo I had indeed done it this way. Though it's 1 (there was 0 zero).
         function_redo = redo[0]
-        redo_type = self.get_function_type(function_redo)
+        redo_type, name_UI = self.get_function_type(function_redo)
+        snapshot = self.stack[self.stack_ptr][2]
+        undo = self.stack[self.stack_ptr + 1][0]
+        self.log_history += "- Redo: " + self.generate_log(snapshot, undo[1:], redo[1:], name_UI)
         if redo_type == "Change":
             self.amount_changes += 1
         self.stack_ptr += 1 #We advanced one step.
@@ -88,16 +108,20 @@ class UndoRedo:
         redo[0](*redo[1:])
 
     def undo_redo(self, undo, redo): #When you perform an action... ah right, the same function is going to be called. So there are a few details to keep in mind. I got this. #Yeah maybe, the function that we pass is not recursive, that is, we create an additional layer. Looks like huge work, but it could work pretty good. It seems reasonable yet at this stage. And if not, perhaps it could be automated somehow. You know, like moving directories and stuff like that. I don't see it very often but that doesn't mean it can't be done. I think it works very well in a lot of situations. Let's do this.
-        if len(self.stack[self.stack_ptr]) == 2: #This needs to happen first, otherwise self.stack already lost its previous state. #Oh well whatever. Pop only returns default None for dictionaries, not for lists.
+        if len(self.stack[self.stack_ptr]) >= 2: #Now has to be >= 2 due to addition of snapshot. Well could be 3 too. But >= 2 gives me the idea there is more than one, which yeah, redo and snapshot. #This needs to happen first, otherwise self.stack already lost its previous state. #Oh well whatever. Pop only returns default None for dictionaries, not for lists.
             self.stack_copy = self.copy_undo_redo() #self.stack[:] #And this also needs to happen first, before we pop. #We'll need this for the switch_branch_undo_redo functionality feature. #But only do it if a different branch was created. Seems clearer to me that way (I don't think there are performance differences).
             self.stack_copy_ptr = self.stack_ptr
             self.stack[self.stack_ptr].pop(1) #If there is currently a redo, remove it. There are no more references to old data.
+            self.stack[self.stack_ptr].pop(1) #Details details. Now we have to remove the corresponding snapshot too.
         function_redo = redo[0]
-        function_type = self.get_function_type(function_redo)
+        function_type, name_UI = self.get_function_type(function_redo)
+        snapshot = CreateAnimsSnapshot(self.createanims)
+        self.log_history += "- " + self.generate_log(snapshot, undo[1:], redo[1:], name_UI)
         if function_type == "Change": #I love this.
             self.amount_changes += 1
         self.stack = self.stack[:self.stack_ptr+1] #Clear all the redo.
         self.stack[self.stack_ptr].append(redo) #Here we do want an append. #Where we are, add the redo.
+        self.stack[self.stack_ptr].append(snapshot) #And, add the Snapshot.
         self.stack_ptr += 1
         self.stack.append([]) #stack[stack_ptr] = [] #By definition of undo_redo (called for new actions), this will be empty. Won't have anything.
         self.stack[self.stack_ptr].append(undo) #It really has to be an append. #It's an extend, otherwise it creates a list inside the list. #And where we are after the changes, add the undo.
@@ -124,12 +148,26 @@ class UndoRedo:
         else:
             self.createanims.root.title("Create Anims - Saved")
 
-    def get_function_type(self, function):
+    def get_function_type(self, function): #Isn't this like, extremely similar to what I do when I consume values? There's a vital difference. Here I also do error checking? I think you could call it that. I was going to just return Unknown and let it keep going, show Unknown in the log but on second thought, this is my application my tool my program my everything, so I'm not gonna hide stuff. Break! lol. And then also yeah here I can check for typos and stuff Navigationn instead of Navigation like that. Beautiful.
         name_UI = function_name_translation_dict.get(function.__name__, function.__name__)
-        if name_UI == function.__name__:
-            function_type = "Unknown"
-        elif name_UI[1] == "Navigation":
+        if name_UI[1] == "Navigation": #Just throw an exception, forget about messagebox.
             function_type = "Navigation"
         elif name_UI[1] == "Change": #I know, those could be constants.
             function_type = "Change"
-        return function_type #I know, there's no else. In this case, the only way this would break is if instead of Navigation we typed Navigationn for example, or if we forgot to add a new type. But it will break immediately due to function_type not defined. I will tell right away. That is exactly what I want.
+        return function_type, name_UI #Yes, I know the function is called function_type but they're closely related. I prefer it this way. #I know, there's no else. In this case, the only way this would break is if instead of Navigation we typed Navigationn for example, or if we forgot to add a new type. But it will break immediately due to function_type not defined. I will tell right away. That is exactly what I want.
+
+    def generate_log(self, snapshot, undo_params, redo_params, name_UI): #Could send undo and redo as a whole but... alright, let's send only the params.
+        text_to_format = name_UI[0]
+        parameters = name_UI[2]
+        list_format = [] #Right, it can't be a tuple, since it's immutable.
+        for parameter in parameters:
+            if parameter.startswith("undo"):
+                argument_position = int(parameter.split(":")[1])
+                list_format.append(undo_params[argument_position])
+            elif parameter.startswith("redo"):
+                argument_position = int(parameter.split(":")[1])
+                list_format.append(redo_params[argument_position])
+            else:
+                list_format.append(snapshot.__dict__[parameter])
+        log_formatted = text_to_format.format(*list_format) + "\n"
+        return log_formatted

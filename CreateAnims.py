@@ -281,6 +281,7 @@ class CreateAnims:
         self.root.bind("<Control-z>", self.undo_redo.undo)
         self.root.bind("<Control-y>", self.undo_redo.redo)
         self.root.bind("<Control-Z>", self.undo_redo.switch_branch_undo_redo) #What? Control-Z? Don't you mean Control-Shift-z? Actually yes. But Shift-z means Z, so if you put Control-shift-z, it won't work.
+        self.root.bind("<Control-l>", self.init_log_history_window)
 
         self.root.report_callback_exception = self.self_destruct
 
@@ -402,6 +403,26 @@ class CreateAnims:
         self.undo_redo.decide_undo_redo_status() #Actually, only if they should be reenabled. Leave them at the state they should. Presumably, Undo should be enabled and Redo not, but, this logic will decide. #You can undo and redo again.
         self.physics_window.attributes('-disabled', 0)
         self.physics_window.focus_force()
+
+    def init_log_history_window(self, event=None):
+        self.disable_undo_redo()
+        self.log_history_window = tkinter.Toplevel(self.root)
+        self.log_history_window.title(f"Log History")
+        self.log_history_window.geometry(f"500x400+715+300") #Was going to be 400x400 but some texts don't fit in.
+        self.root.attributes('-disabled', 1)
+        self.log_history_window.transient(self.root)
+        self.log_history_window.grab_set()
+        self.log_history_window.focus_force()
+
+        self.log_history_frame = tkinter.LabelFrame(self.log_history_window, text="LOG HISTORY", bd=2, width=500, height=360)
+        self.log_history_frame.pack(anchor="nw", padx=15)
+        self.log_history_label = tkinter.Label(self.log_history_frame, text=self.undo_redo.log_history, justify="left", wraplength=500)
+        self.log_history_label.place(x=5, y=5)
+
+        self.root.wait_window(self.log_history_window)
+        self.undo_redo.decide_undo_redo_status() #Actually, only if they should be reenabled. Leave them at the state they should. Presumably, Undo should be enabled and Redo not, but, this logic will decide. #You can undo and redo again.
+        self.root.attributes('-disabled', 0)
+        self.root.focus_force()
 
     def disable_undo_redo(self): #Also, I understand it may be counterintuitive for this to be in CreateAnims but status to be in UndoRedo? But it makes sense to me. Here we're plain disabling for the init of a window which is part of CreateAnims.
         self.edit_menu.entryconfigure("Undo", state="disabled") #Ya know what, yes, I'll make it a method and I just call the method. #You cannot undo or redo anything here. Not until you enter your values or close the window without any ado.
