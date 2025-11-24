@@ -442,4 +442,7 @@ class CreateAnims:
         crash_log = "crash_log.txt"
         with open(crash_log, "w") as crash_log_file:
             crash_log_file.write(error_message)
+        for widget in self.root.winfo_children(): #Physics Window might be open, or not, Physics Dialog might be open, Log History window, Trace, etc. etc... so with this code, we make sure that those windows are destroyed if they exist and CreateAnims can close. And go to sleep and rest.
+            if isinstance(widget, tkinter.Toplevel):
+                widget.destroy()
         sys.exit(999)
