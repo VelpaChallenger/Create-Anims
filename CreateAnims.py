@@ -437,7 +437,7 @@ class CreateAnims:
     def self_destruct(self, *args):
         from tkinter import messagebox
         error_message = "".join(traceback.format_exception(*args)) #*args here is arguably and maybe even the same as sys.exception(). #Changed order, do it here so that I don't even have to click on the messagebox, I can see the error right away when debugging in my computer. Beautiful.
-        print(error_message) #Yeah whatever. I was going to add a flag but this is fine. I think I can understand when I saw this in other contexts. It will work in my local, with the executable it just won't do anything. No errors exceptions anything.
+        print(error_message, end="") #Yeah whatever. I was going to add a flag but this is fine. I think I can understand when I saw this in other contexts. It will work in my local, with the executable it just won't do anything. No errors exceptions anything.
         messagebox.showerror(title="Unhandled exception", message="Sorry, there was a problem while running CreateAnims. Please see crash_log.txt for details. (and please report the bug!)")
         crash_log = "crash_log.txt"
         with open(crash_log, "w") as crash_log_file:
