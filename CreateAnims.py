@@ -414,10 +414,40 @@ class CreateAnims:
         self.log_history_window.grab_set()
         self.log_history_window.focus_force()
 
-        self.log_history_frame = tkinter.LabelFrame(self.log_history_window, text="LOG HISTORY", bd=2, width=500, height=360)
+        self.log_history_canvas_frame = tkinter.Frame(self.log_history_window, bd=0)
+        self.log_history_canvas_frame.pack(anchor="nw")
+
+        self.log_history_canvas_frame.bind_all("<MouseWheel>", lambda event: self.log_history_canvas.yview_scroll(int(-1*(event.delta/120)), "units")) #self.move_scrollbar)
+        self.log_history_canvas_frame.bind_all("<Up>", lambda event: self.log_history_canvas.yview_scroll(-1, "units")) #self.move_scrollbar_up)
+        self.log_history_canvas_frame.bind_all("<Down>", lambda event: self.log_history_canvas.yview_scroll(1, "units"))#self.move_scrollbar_down)
+
+        log_history_canvas_height = 340 #Should always be this value and will use it several times so I'm defining it here.
+        self.log_history_canvas = tkinter.Canvas(self.log_history_canvas_frame, bd=0, highlightthickness=0, height=log_history_canvas_height, width=480) #scrollregion=(0,0,500,500), width=100, height=50) #Exact measures will be determined later. This is the predetermined stuff.
+        self.log_history_canvas.pack(side="left", fill="both", expand=True)
+        self.frame_log_history = tkinter.Frame(self.log_history_canvas, border=0) #This one is the scrollable. log_history_frame is the LabelFrame.
+        self.frame_log_history.bind("<Configure>", lambda event: self.log_history_canvas.configure(scrollregion=self.log_history_canvas.bbox('all'))) #Let's please verify that this bind doesn't mess up memory.
+        self.log_history_canvas.create_window((0, 0), window=self.frame_log_history, anchor="nw")
+        vbar = tkinter.Scrollbar(self.log_history_canvas_frame, orient="vertical", command=self.log_history_canvas.yview, takefocus=1)
+        self.log_history_canvas.configure(yscrollcommand=vbar.set) #One will always have a configure. canvas needs hbar for the scrollcommand. hbar needs the canvas for the command.
+        vbar.pack(side="left", fill="y")
+
+        self.log_history_frame = tkinter.LabelFrame(self.frame_log_history, text="LOG HISTORY", bd=2, width=460)
         self.log_history_frame.pack(anchor="nw", padx=15)
-        self.log_history_label = tkinter.Label(self.log_history_frame, text=self.undo_redo.log_history, justify="left", wraplength=500)
+        self.log_history_label = tkinter.Label(self.log_history_frame, text=self.undo_redo.log_history.rstrip(), justify="left", wraplength=500)
         self.log_history_label.place(x=5, y=5)
+        self.log_history_window.update() #Updates log_history_label height (well everything but I care about height in this case).
+        log_history_label_height = self.log_history_label.winfo_height() + 25 #25 seems like the right number to make all look cool.
+        if log_history_label_height < log_history_canvas_height: #I don't usually put logic in CreateAnims but yes.
+            log_history_label_height = log_history_canvas_height
+        self.log_history_frame.configure(height=log_history_label_height) #So the frame will be as high as the frame. Excellent.
+
+        self.log_history_command_base = tkinter.Frame(self.log_history_window, bd=0)
+        self.log_history_command_base.pack()
+
+        self.log_history_copy_button = ttk.Button(self.log_history_command_base, text="Copy", takefocus=0) #Copy log, copy to clipboard.
+        self.log_history_copy_button.pack(side="left", padx=15, pady=15)
+        self.log_history_OK_button = ttk.Button(self.log_history_command_base, text="OK", takefocus=0, command=self.log_history_window.destroy)
+        self.log_history_OK_button.pack(side="left", padx=15, pady=15)
 
         self.root.wait_window(self.log_history_window)
         self.undo_redo.decide_undo_redo_status() #Actually, only if they should be reenabled. Leave them at the state they should. Presumably, Undo should be enabled and Redo not, but, this logic will decide. #You can undo and redo again.
