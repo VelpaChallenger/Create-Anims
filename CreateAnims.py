@@ -441,11 +441,17 @@ class CreateAnims:
             log_history_label_height = log_history_canvas_height
         self.log_history_frame.configure(height=log_history_label_height) #So the frame will be as high as the frame. Excellent.
 
-        self.log_history_command_base = tkinter.Frame(self.log_history_window, bd=0)
-        self.log_history_command_base.pack()
+        self.log_history_command_base_container = tkinter.Frame(self.log_history_window, bd=0)
+        self.log_history_command_base_container.pack(fill="both", expand=True) #We need a container for place logic to work the way we want and center things the way we want it.
+
+        self.log_history_command_base = tkinter.Frame(self.log_history_command_base_container, bd=0)
+        self.log_history_command_base.place(x=33, y=0, anchor="nw") #Default seems to be nw, but still, to be specific/explicit. Yes confirmed, nw is default.
+
+        self.log_history_label_copy_ok = tkinter.Label(self.log_history_command_base, text="", width=16, justify="right", anchor="ne")
+        self.log_history_label_copy_ok.pack(side="left")
 
         self.log_history_copy_button = ttk.Button(self.log_history_command_base, text="Copy", takefocus=0, command=self.copy_to_clipboard) #Copy log, copy to clipboard.
-        self.log_history_copy_button.pack(side="left", padx=15, pady=15)
+        self.log_history_copy_button.pack(side="left", padx=(8, 15), pady=15)
         self.log_history_OK_button = ttk.Button(self.log_history_command_base, text="OK", takefocus=0, command=self.log_history_window.destroy)
         self.log_history_OK_button.pack(side="left", padx=15, pady=15)
 
@@ -455,7 +461,11 @@ class CreateAnims:
         self.root.focus_force()
 
     def copy_to_clipboard(self):
+        if not self.undo_redo.log_history.rstrip():
+            self.log_history_label_copy_ok.configure(text="Nothing to copy (yet)", fg="red")
+            return
         self.root.clipboard_append(self.undo_redo.log_history.rstrip())
+        self.log_history_label_copy_ok.configure(text="Copied!", fg="green")
 
     def disable_undo_redo(self): #Also, I understand it may be counterintuitive for this to be in CreateAnims but status to be in UndoRedo? But it makes sense to me. Here we're plain disabling for the init of a window which is part of CreateAnims.
         self.edit_menu.entryconfigure("Undo", state="disabled") #Ya know what, yes, I'll make it a method and I just call the method. #You cannot undo or redo anything here. Not until you enter your values or close the window without any ado.
