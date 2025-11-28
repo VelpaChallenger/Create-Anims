@@ -464,6 +464,7 @@ class CreateAnims:
         if not self.undo_redo.log_history.rstrip():
             self.log_history_label_copy_ok.configure(text="Nothing to copy (yet)", fg="red")
             return
+        self.root.clipboard_clear() #Oops. Yes, first this to avoid copying a lot if Copy is pressed multiple times.
         self.root.clipboard_append(self.undo_redo.log_history.rstrip())
         self.log_history_label_copy_ok.configure(text="Copied!", fg="green")
 
