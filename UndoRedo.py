@@ -2,7 +2,12 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_anim_value": ("Character {0}. Navigated from anim {1:02d} to anim {2:02d}.", "Navigation", ("character_name", "undo:0", "redo:0")), #I like the idea. Have a setting that shows both navigation and changes, and another that shows only changes, stuff like that.
     "load_new_frame_value": ("Character {0}. Navigated from frame {1:02d} to frame {2:02d} in anim {3:02d}.", "Navigation", ("character_name", "undo:0", "redo:0", "anim")),
     "load_new_frame_id_value": ("Character {0}. Changed frame ID from {1:02d} to {2:02d} for frame {3:02d} in anim {4:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame", "anim")), #This could be a nice scenario for format strings but not the f ones, the ones that allow for replacing/formatting later on.
-    "load_new_character_value": ("Navigated from character {0} to character {1}.", "Navigation", ("convert_character:undo:0", "convert_character:redo:0"))
+    "load_new_character_value": ("Navigated from character {0} to character {1}.", "Navigation", ("convert_character:undo:0", "convert_character:redo:0")),
+    "load_new_physics_id_value": ("Changed physics ID from {0:02d} to {1:02d} for anim {2:02d}.", "Change", ("undo:0", "redo:0", "anim")),
+    "load_new_x_offset_value": ("Character {0}. Changed X Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
+    "load_new_y_offset_value": ("Character {0}. Changed Y Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
+    "load_new_width_value": ("Character {0}. Changed width from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
+    "load_new_height_value": ("Character {0}. Changed height from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.
