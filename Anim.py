@@ -128,8 +128,10 @@ class PhysicsLabel:
             self.createanims.anim.remove_physics_column_value(self.frame_index)
             return
         x_physics = physics[2*self.frame_index] #This is not for display, so we don't need to call calculate_physics.
+        x_physics_converted = self.createanims.anim.calculate_physics(x_physics)
         y_physics = physics[(2*self.frame_index) + 1]
-        self.createanims.undo_redo.undo_redo([self.createanims.anim.insert_physics_column_value, self.frame_index, x_physics, y_physics], [self.createanims.anim.remove_physics_column_value, self.frame_index])
+        y_physics_converted = self.createanims.anim.calculate_physics(y_physics)
+        self.createanims.undo_redo.undo_redo([self.createanims.anim.insert_physics_column_value, self.frame_index, x_physics, y_physics, x_physics_converted, y_physics_converted], [self.createanims.anim.remove_physics_column_value, self.frame_index])
 
     def insert(self):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
@@ -139,7 +141,7 @@ class PhysicsLabel:
             self.createanims.physics_window.attributes('-disabled', 0)
             self.createanims.physics_window.focus_force()
             return
-        self.createanims.undo_redo.undo_redo([self.createanims.anim.remove_physics_column_value, self.frame_index + 1], [self.createanims.anim.insert_physics_column_value, self.frame_index + 1])
+        self.createanims.undo_redo.undo_redo([self.createanims.anim.remove_physics_column_value, self.frame_index + 1], [self.createanims.anim.insert_physics_column_value, self.frame_index + 1, 0x00, 0x00, 0x00, 0x00]) #I don't really like it but I need the 0x00 for the Log History. Other approaches like, inspecting functions and stuff... this will do.
 
 class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of it. #Similar structure to TileUtils. You have the main class, which then uses data from other classes to do its stuff.
 
@@ -537,13 +539,13 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         physics.pop(2*frame_index) #Well two times to account also for the Y. And yeah, everything gets shifted when doing pop so this works.
         self.fill_physics_grid() #Kinda like a refresh, but for physics.
 
-    def insert_physics_column_value(self, frame_index, x_physics=0x00, y_physics=0x00):
+    def insert_physics_column_value(self, frame_index, x_physics=0x00, y_physics=0x00, x_physics_converted=0x00, y_physics_converted=0x00): #Again, for Log History.
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
         physics.insert((2*frame_index), y_physics) #You may think this won't work when inserting at the end, but it does. Why? Because, 2*self.frame_index returns the x of the last physics. And that's the key. Exactly +2 after that, there's the 0x80. So you're inserting where 0x80 is, pushing 0x80.
         physics.insert((2*frame_index), x_physics) #What, inverted? Yes. I think you could also do +1 first and it would work? But I like more this.
         self.fill_physics_grid()
 
-    def load_new_physics_value(self, physics_dialog_current_frame, new_x_physics, new_y_physics):
+    def load_new_physics_value(self, physics_dialog_current_frame, new_x_physics, new_y_physics, new_x_physics_converted, new_y_physics_converted): #converted will make it easier on the Log History to show -3 as -3 instead of 253.
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
         physics[2*physics_dialog_current_frame] = new_x_physics
         physics[(2*physics_dialog_current_frame) + 1] = new_y_physics

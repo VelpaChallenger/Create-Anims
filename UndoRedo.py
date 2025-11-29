@@ -8,6 +8,11 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_y_offset_value": ("Character {0}. Changed Y Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
     "load_new_width_value": ("Character {0}. Changed width from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
     "load_new_height_value": ("Character {0}. Changed height from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
+    "init_physics_window": ("Opened physics window.", "Navigation", ()),
+    "destroy_physics_window": ("Closed physics window.", "Navigation", ()), #Funny how it's init and destroy for programmers, but open and close for users. Sharing some thoughts here. I could have called it open and close maybe?
+    "load_new_physics_value": ("Changed physics from {0:02d} {1:02d} to {2:02d} {3:02d} for frame and physics ID {4:02d} {5:02d}.", "Change", ("undo:3", "undo:4", "redo:3", "redo:4", "undo:0", "physics_id")), #I liked more updated here but okay let's keep the consistency.
+    "insert_physics_column_value": ("Inserted physics {0:02d} {1:02d} at position (frame) {2:02d} for physics ID {3:02d}.", "Change", ("redo:3", "redo:4", "undo:0", "physics_id")),
+    "remove_physics_column_value": ("Removed physics {0:02d} {1:02d} at position (frame) {2:02d} for physics ID {3:02d}.", "Change", ("undo:3", "undo:4", "undo:0", "physics_id")),
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.
