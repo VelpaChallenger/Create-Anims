@@ -485,7 +485,7 @@ class CreateAnims:
         messagebox.showerror(title="Unhandled exception", message="Sorry, there was a problem while running CreateAnims. Please see crash_log.txt for details. (and please report the bug!)")
         crash_log = "crash_log.txt"
         with open(crash_log, "w") as crash_log_file:
-            crash_log_file.write(error_message)
+            crash_log_file.write(error_message + "\nLog History:\n\n" + self.undo_redo.log_history.rstrip()) #Could use f-string but this is fine.
         for widget in self.root.winfo_children(): #Physics Window might be open, or not, Physics Dialog might be open, Log History window, Trace, etc. etc... so with this code, we make sure that those windows are destroyed if they exist and CreateAnims can close. And go to sleep and rest.
             if isinstance(widget, tkinter.Toplevel):
                 widget.destroy()
