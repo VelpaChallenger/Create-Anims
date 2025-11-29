@@ -13,6 +13,12 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_physics_value": ("Changed physics from {0:02d} {1:02d} to {2:02d} {3:02d} for frame and physics ID {4:02d} {5:02d}.", "Change", ("undo:3", "undo:4", "redo:3", "redo:4", "undo:0", "physics_id")), #I liked more updated here but okay let's keep the consistency.
     "insert_physics_column_value": ("Inserted physics {0:02d} {1:02d} at position (frame) {2:02d} for physics ID {3:02d}.", "Change", ("redo:3", "redo:4", "undo:0", "physics_id")),
     "remove_physics_column_value": ("Removed physics {0:02d} {1:02d} at position (frame) {2:02d} for physics ID {3:02d}.", "Change", ("undo:3", "undo:4", "undo:0", "physics_id")),
+    "load_new_character_palette_imported_value": ("Imported palette for character {0}. Filename: {1}", "Change", ("character_name", "redo:1")), #Updated palette for character. #Updated {character_name}'s palette.
+    "load_new_chr_imported_value": ("Imported CHR for character {0} for CHR bank {1}. Filename: {2}", "Change", ("character_name", "chr_bank", "redo:1")),
+    "load_new_chr_palette_imported_value": ("Imported CHR pal for character {0} for CHR bank {1}. Filename: {2}", "Change", ("character_name", "chr_bank", "redo:1")),
+    "load_new_frame_imported_value": ("Imported frame for character {0} for frame ID {1}. Filename: {2}", "Change", ("character_name", "frame_id", "redo:1")),
+    "load_new_anim_imported_value": ("Imported anim for character {0}. Filename: {1}", "Change", ("character_name", "redo:1")),
+    "load_new_physics_imported_value": ("Imported physics for character anim physics ID {0} {1} {2}. Filename: {3}", "Change", ("character_name", "anim", "physics_id", "redo:1")),
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.
@@ -23,6 +29,7 @@ class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's
         self.anim = createanims.current_anim
         self.frame = createanims.current_frame
         self.frame_id = createanims.current_frame_id
+        self.chr_bank = createanims.current_chr_bank
         self.physics_id = createanims.current_physics_id
 
 class UndoRedo:

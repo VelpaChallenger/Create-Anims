@@ -133,9 +133,9 @@ class Command:
         old_palette = character.palette[:] #Just in case, don't use the exact same list, use a copy. Oh, but to do same thing as with frame_tiles, let's do it... hmmmm... yeah I know, frame_tiles wasn't part of the update so... ok whatever this is ok.
         if old_palette == new_palette: #Same check as always or almost always, it matters in this case.
             return
-        self.createanims.undo_redo.undo_redo([self.load_new_character_palette_imported_value, old_palette], [self.load_new_character_palette_imported_value, new_palette])
+        self.createanims.undo_redo.undo_redo([self.load_new_character_palette_imported_value, old_palette, "None"], [self.load_new_character_palette_imported_value, new_palette, pal_filename])
 
-    def load_new_character_palette_imported_value(self, new_palette): #Similar to for index, but this loads the entire palette all at once. #And as always, value at the end to identify that this is part of UndoRedo.
+    def load_new_character_palette_imported_value(self, new_palette, imported_from_filename): #Similar to for index, but this loads the entire palette all at once. #And as always, value at the end to identify that this is part of UndoRedo.
         character = self.createanims.characters[self.createanims.current_character]
         character.palette = new_palette[:] #Same, if one changes, I don't want the other to change too.
         self.createanims.refresh_UI() #We always do that here inside the value. #This is the only exception, there's nothing affected by this. The hovers, the entries, a refresh_UI is enough to show updates.
@@ -160,9 +160,9 @@ class Command:
         old_chr = character.chrs[self.createanims.current_chr_bank][:]
         if old_chr == new_chr:
             return
-        self.createanims.undo_redo.undo_redo([self.load_new_chr_imported_value, old_chr], [self.load_new_chr_imported_value, new_chr])
+        self.createanims.undo_redo.undo_redo([self.load_new_chr_imported_value, old_chr, "None"], [self.load_new_chr_imported_value, new_chr, chr_filename])
 
-    def load_new_chr_imported_value(self, new_chr):
+    def load_new_chr_imported_value(self, new_chr, imported_from_filename):
         character = self.createanims.characters[self.createanims.current_character]
         character.chrs[self.createanims.current_chr_bank] = new_chr[:]
         self.createanims.tile_utils.load_new_chr_bank_value(self.createanims.current_chr_bank) #Yes I do have to do it always. There are always checks I need to run when importing new stuff. Like clearing or leaving the entry in white if it was red also stuff like that all sorts of stuff.
@@ -187,9 +187,9 @@ class Command:
         old_chr_palette = character.chr_palettes[self.createanims.current_chr_bank][:]
         if old_chr_palette == new_chr_palette:
             return
-        self.createanims.undo_redo.undo_redo([self.load_new_chr_palette_imported_value, old_chr_palette], [self.load_new_chr_palette_imported_value, new_chr_palette])
+        self.createanims.undo_redo.undo_redo([self.load_new_chr_palette_imported_value, old_chr_palette, "None"], [self.load_new_chr_palette_imported_value, new_chr_palette, chr_pal_filename])
 
-    def load_new_chr_palette_imported_value(self, new_chr_palette):
+    def load_new_chr_palette_imported_value(self, new_chr_palette, imported_from_filename):
         character = self.createanims.characters[self.createanims.current_character]
         character.chr_palettes[self.createanims.current_chr_bank] = new_chr_palette[:]
         self.createanims.tile_utils.load_new_chr_bank_value(self.createanims.current_chr_bank)
@@ -215,9 +215,9 @@ class Command:
         old_frame_bytes = old_frame.metadata.get_bytes() + old_frame.tiles #I could also like save an attribute old_frame_bytes or just frame_bytes in the Frame but, I want to save memory? lol it's just a couple of bytes but whatever.
         if old_frame_bytes == new_frame_bytes: #My, come to think of it, this is a huge huge advantage of doing it this way. This becomes super trivial to check. Whereas with instances checks, I will try just to satisfy my curiosity but I'm pretty sure it wouldn't work because the instances themselves aren't equal. Or maybe it's like lists? And it checks values themselves. Will check.
             return
-        self.createanims.undo_redo.undo_redo([self.load_new_frame_imported_value, old_frame_bytes], [self.load_new_frame_imported_value, new_frame_bytes])
+        self.createanims.undo_redo.undo_redo([self.load_new_frame_imported_value, old_frame_bytes, "None"], [self.load_new_frame_imported_value, new_frame_bytes, frame_filename])
 
-    def load_new_frame_imported_value(self, new_frame_bytes):
+    def load_new_frame_imported_value(self, new_frame_bytes, imported_from_filename):
         character = self.createanims.characters[self.createanims.current_character]
         character.frames[self.createanims.current_frame_id] = Frame(new_frame_bytes) #At this point, the old Frame will be garbage collected and the memory freed.
         self.createanims.anim.load_new_frame_value(self.createanims.current_frame) #Same logic as anim. This was causing bugs in UndoRedo. This has to update CHR bank and a bunch of other stuff.
@@ -243,9 +243,9 @@ class Command:
         old_anim_bytes = [old_anim.physics_id] + old_anim.frame_ids
         if old_anim_bytes == new_anim_bytes:
             return
-        self.createanims.undo_redo.undo_redo([self.load_new_anim_imported_value, old_anim_bytes], [self.load_new_anim_imported_value, new_anim_bytes])
+        self.createanims.undo_redo.undo_redo([self.load_new_anim_imported_value, old_anim_bytes, "None"], [self.load_new_anim_imported_value, new_anim_bytes, anim_filename])
 
-    def load_new_anim_imported_value(self, new_anim_bytes):
+    def load_new_anim_imported_value(self, new_anim_bytes, imported_from_filename):
         character = self.createanims.characters[self.createanims.current_character]
         character.anims[self.createanims.current_anim] = CharacterAnim(new_anim_bytes)
         self.createanims.anim.load_new_anim_value(self.createanims.current_anim) #Ironic but yes. Load the same ID, so not new but, you will find changes when loading it. #self.createanims.current_frame_id = character.anims[self.createanims.current_anim].frame_ids[0] #Very important otherwise UI refresh won't draw it updated. (oh no, I just made the horizontal scrollbar of death appear!) Also no, no need to call load_new_anim here, though of course it would work. But I feel this is cleaner in this context. Nothing has to change except this. Even the arrow status will be fine as it is, as it is still the same ids. Huh wait. Yes I do need to call it. Thanks me for writing this. import_frame indeed doesn't need it because the change is only graphical, like, only the tiles will change.
@@ -269,8 +269,8 @@ class Command:
         old_physics = self.createanims.physics_list[self.createanims.current_physics_id]
         if old_physics == new_physics:
             return
-        self.createanims.undo_redo.undo_redo([self.load_new_physics_imported_value, old_physics], [self.load_new_physics_imported_value, new_physics])
+        self.createanims.undo_redo.undo_redo([self.load_new_physics_imported_value, old_physics, "None"], [self.load_new_physics_imported_value, new_physics, physics_filename])
 
-    def load_new_physics_imported_value(self, new_physics):
+    def load_new_physics_imported_value(self, new_physics, imported_from_filename):
         self.createanims.physics_list[self.createanims.current_physics_id] = new_physics[:] #Analogous to chr_palette. Has to be copy otherwise when we modify them in Edit physics for example they'll both get modified. For frames and anims it's different because we don't use the bytes themselves, we use the attributes which were filled based on those bytes. Not the same.
         self.createanims.anim.load_new_physics_id_value(self.createanims.current_physics_id) #I was going to add a messagebox but... I think it'll be enough with the potential physics ID mismatch and if not, you can still use Edit physics, like, I don't want it to be too annoying, I know what it feels like. But if I'm asked to add it, I will. #Similar logic to why loading new anim when importing an anim. There are some updates that need to run. Like for example, if the new physics has a mismatch, that has to run. And has to set the flag.
