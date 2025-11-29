@@ -3,7 +3,7 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_frame_value": ("Character {0}. Navigated from frame {1:02d} to frame {2:02d} in anim {3:02d}.", "Navigation", ("character_name", "undo:0", "redo:0", "anim")),
     "load_new_frame_id_value": ("Character {0}. Changed frame ID from {1:02d} to {2:02d} for frame {3:02d} in anim {4:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame", "anim")), #This could be a nice scenario for format strings but not the f ones, the ones that allow for replacing/formatting later on.
     "load_new_character_value": ("Navigated from character {0} to character {1}.", "Navigation", ("convert_character:undo:0", "convert_character:redo:0")),
-    "load_new_physics_id_value": ("Changed physics ID from {0:02d} to {1:02d} for anim {2:02d}.", "Change", ("undo:0", "redo:0", "anim")),
+    "load_new_physics_id_value": ("Character {0}. Changed physics ID from {1:02d} to {2:02d} for anim {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "anim")), #Turns out I do care about character, because it's the physics ID for this anim, and what character? There you go.
     "load_new_x_offset_value": ("Character {0}. Changed X Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
     "load_new_y_offset_value": ("Character {0}. Changed Y Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
     "load_new_width_value": ("Character {0}. Changed width from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
