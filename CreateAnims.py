@@ -404,8 +404,9 @@ class CreateAnims:
         self.physics_dialog_current_frame = frame_index #Will come in handy for EntryReturn. #Actually... let's do something a little different. Or... nah whatever.
         self.physics_window.wait_window(self.physics_dialog)
         self.undo_redo.decide_undo_redo_status() #Actually, only if they should be reenabled. Leave them at the state they should. Presumably, Undo should be enabled and Redo not, but, this logic will decide. #You can undo and redo again.
-        self.physics_window.attributes('-disabled', 0)
-        self.physics_window.focus_force()
+        if self.physics_window.winfo_exists(): #Might not exist anymore due to a destroy as part of exception handling.
+            self.physics_window.attributes('-disabled', 0)
+            self.physics_window.focus_force()
 
     def init_log_history_window(self, event=None):
         self.disable_undo_redo()
