@@ -132,6 +132,10 @@ class CreateAnims:
         import_menu.add_command(label="Anim", command=self.command.import_anim)
         import_menu.add_command(label="Physics", command=self.command.import_physics)
         self.menu_bar.add_cascade(label="Import", menu=import_menu)
+        help_menu = tkinter.Menu(self.menu_bar, tearoff=0)
+        help_menu.add_command(label="About", command=self.init_about_window)
+        help_menu.add_command(label="Docs", command=self.command.open_docs_in_browser)
+        self.menu_bar.add_cascade(label="Help", menu=help_menu)
         self.root.config(menu=self.menu_bar)
 
         separator = ttk.Separator(self.root, orient='horizontal')
@@ -471,6 +475,40 @@ class CreateAnims:
         self.root.clipboard_clear() #Oops. Yes, first this to avoid copying a lot if Copy is pressed multiple times.
         self.root.clipboard_append(self.undo_redo.log_history.rstrip())
         self.log_history_label_copy_ok.configure(text="Copied!", fg="green")
+
+    def init_about_window(self):
+        self.disable_undo_redo()
+        self.about_window = tkinter.Toplevel(self.root)
+        self.about_window.title(f"About CreateAnims")
+        self.about_window.geometry(f"500x400+715+300")
+        self.root.attributes('-disabled', 1)
+        self.about_window.transient(self.root)
+        self.about_window.grab_set()
+        self.about_window.focus_force()
+
+        self.about_title = tkinter.Label(self.about_window, text="CreateAnims VelpaChallenger")
+        self.about_title.pack()
+        self.about_version = tkinter.Label(self.about_window, text="Version: ", anchor="nw")
+        self.about_version.pack(anchor="nw", pady=(120, 0))
+        self.about_commit = tkinter.Label(self.about_window, text="Commit: ", anchor="nw")
+        self.about_commit.pack(anchor="nw")
+        thanks_text = (
+        "Thanks to the following people for their contributions in one way or another!\n\n" #My personality, with exclamation and all. #Be it testing, suggestions, moral support, giving the idea etc. etc.
+        "\t-\n"
+        "\t-"
+        )
+        self.about_thanks = tkinter.Label(self.about_window, text=thanks_text, anchor="nw", justify="left")
+        self.about_thanks.pack(anchor="nw")
+        description_text = "Originally intended for MK3 NES Arkade Edition, but written with the intention of being extended to other games to make creating animations easier and smoother.\nAs always, suggestions, bug reports recommendations ideas comments etc. etc. are more than welcome!"
+        self.about_description = tkinter.Label(self.about_window, text=description_text, anchor="nw", justify="left", wraplength=500)
+        self.about_description.pack(anchor="nw", pady=(30, 0))
+        self.about_ok = ttk.Button(self.about_window, text="OK", takefocus=0, command=self.about_window.destroy)
+        self.about_ok.pack(pady=(10, 0))
+
+        self.root.wait_window(self.about_window)
+        self.undo_redo.decide_undo_redo_status() #Actually, only if they should be reenabled. Leave them at the state they should. Presumably, Undo should be enabled and Redo not, but, this logic will decide. #You can undo and redo again.
+        self.root.attributes('-disabled', 0)
+        self.root.focus_force()
 
     def disable_undo_redo(self): #Also, I understand it may be counterintuitive for this to be in CreateAnims but status to be in UndoRedo? But it makes sense to me. Here we're plain disabling for the init of a window which is part of CreateAnims.
         self.edit_menu.entryconfigure("Undo", state="disabled") #Ya know what, yes, I'll make it a method and I just call the method. #You cannot undo or redo anything here. Not until you enter your values or close the window without any ado.
