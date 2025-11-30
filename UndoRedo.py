@@ -45,8 +45,7 @@ class UndoRedo:
         self.stack_copy = None #We'll use this to know whether we can actually switch branches.
         self.stack_copy_ptr = 0
         self.last_saved_ptr = 0
-        self.trace = []
-        self.amount_changes = 0 #Also, to understand why/how it works, think of it as a ptr of sorts. It makes it a lot easier to understand. #Not anymore! I never liked it in the first place. I like this a lot more. #self.unsaved_changes = False #We'll use this instead because we need to differentiate changes from navigation. I still think that, maybe, it would be better to have two completely different implementations, and that UndoRedo only refers to changes. But I'm not fully convinced of the implications at UI level, experience and whatnot. So I'm giving a try to this approach.
+        self.trace = [] #This needs to be a list, will make pop and append easier. So how do we log then? "".join. Of course could have done same for log_history but makes it clearer on the intent. Since I don't intend to add remove and such, well, let it be a text. (moved comment) #self.amount_changes = 0 #Also, to understand why/how it works, think of it as a ptr of sorts. It makes it a lot easier to understand. #Not anymore! I never liked it in the first place. I like this a lot more. #self.unsaved_changes = False #We'll use this instead because we need to differentiate changes from navigation. I still think that, maybe, it would be better to have two completely different implementations, and that UndoRedo only refers to changes. But I'm not fully convinced of the implications at UI level, experience and whatnot. So I'm giving a try to this approach.
         self.saved = False #True, I agree. Those are different things. self.strack_ptr I mean self.stack_ptr == 0 doesn't imply not saved, and != 0 doesn't imply saved. Saved is something that literally means that: a save happened. It is not related to the stack_ptr. In other words, yes, after you save, you can have either Unsaved changes or Saved, meaning there was at least one save.
         self.log_history = "" #Will have to be a text. Will make it easier to generate the corresponding label.
 
@@ -75,7 +74,7 @@ class UndoRedo:
             redo = self.stack[self.stack_ptr - 1][1]
             self.log_history += "- Switch Branch: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
             if undo_type == "Change":
-                self.amount_changes -= 1
+                self.trace.pop()
             self.stack_ptr -= 1 #Come to think of it, with the new approach of partially switching refresh_UI, I could use undo. Meh. Still, I wouldn't want to call decide_undo_redo_status.
         if self.createanims.in_physics_window:
             init_physics_window_flag = False #Even if the algorithm says 'True'. (I mean the chain of Undo in the stack). If anything, we may have to destroy, but never init if we're already in physics window.
@@ -110,7 +109,7 @@ class UndoRedo:
         redo = self.stack[self.stack_ptr - 1][1]
         self.log_history += "- Undo: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
         if undo_type == "Change":
-            self.amount_changes -= 1
+            self.trace.pop()
         self.stack_ptr -= 1 #We went backwards one step.
         self.decide_undo_redo_status()
         undo[0](*undo[1:]) #So now, node[0] is undo data. Therefore node[0][0] is func, node[0][1] is args. #And the args.
@@ -123,9 +122,10 @@ class UndoRedo:
         redo_type, name_UI = self.get_function_type(function_redo)
         snapshot = self.stack[self.stack_ptr][2]
         undo = self.stack[self.stack_ptr + 1][0]
-        self.log_history += "- Redo: " + self.generate_log(snapshot, undo[1:], redo[1:], name_UI)
+        log_text = "- Redo: " + self.generate_log(snapshot, undo[1:], redo[1:], name_UI)
+        self.log_history += log_text
         if redo_type == "Change":
-            self.amount_changes += 1
+            self.trace.append(log_text)
         self.stack_ptr += 1 #We advanced one step.
         self.decide_undo_redo_status()
         redo[0](*redo[1:])
@@ -139,9 +139,10 @@ class UndoRedo:
         function_redo = redo[0]
         function_type, name_UI = self.get_function_type(function_redo)
         snapshot = CreateAnimsSnapshot(self.createanims)
-        self.log_history += "- " + self.generate_log(snapshot, undo[1:], redo[1:], name_UI)
+        log_text = "- " + self.generate_log(snapshot, undo[1:], redo[1:], name_UI)
+        self.log_history += log_text
         if function_type == "Change": #I love this.
-            self.amount_changes += 1
+            self.trace.append(log_text)
         self.stack = self.stack[:self.stack_ptr+1] #Clear all the redo.
         self.stack[self.stack_ptr].append(redo) #Here we do want an append. #Where we are, add the redo.
         self.stack[self.stack_ptr].append(snapshot) #And, add the Snapshot.
@@ -164,7 +165,7 @@ class UndoRedo:
             self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="disabled")
         else:
             self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="normal")
-        if self.amount_changes: # != 0. The beauty that negative numbers are also considered True.
+        if self.trace: #Updated logic, will now use trace. amount_changes logic breaks when we go back a few steps, then introduce a new branch. # != 0. The beauty that negative numbers are also considered True.
             self.createanims.root.title("Create Anims - Unsaved changes") #print(self.createanims.root.title()) I was going to use .title() to get the current title and then append to that, I could also use a constant but, let's go with this. I will tell if the title at some point changes to maybe CreateAnims and after redoing something or undoing it won't match so I'll just come update it here.
         elif not self.saved:
             self.createanims.root.title("Create Anims")
