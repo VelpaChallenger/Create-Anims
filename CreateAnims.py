@@ -121,6 +121,9 @@ class CreateAnims:
         anim_menu.add_command(label="Toggle draw empty cells", command=self.command.toggle_draw_empty_cells, accelerator="e") #We'll add a little 'anim' in the name for me. Yay.
         self.root.bind("e", self.command.toggle_draw_empty_cells)
         self.menu_bar.add_cascade(label="Anim", menu=anim_menu)
+        tools_menu = tkinter.Menu(self.menu_bar, tearoff=0)
+        tools_menu.add_command(label="Log History", command=self.init_log_history_window, accelerator="Ctrl+L")
+        self.menu_bar.add_cascade(label="Tools", menu=tools_menu) #Yes, usually keyboard shortcuts go here also but, whatever.
         import_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         import_menu.add_command(label="Palette", command=self.command.import_palette)
         import_menu.add_command(label="CHR", command=self.command.import_chr)
