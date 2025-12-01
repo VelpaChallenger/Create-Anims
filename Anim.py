@@ -691,7 +691,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.edit_menu.entryconfigure("Redo", state="disabled")
         self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="disabled")
         self.createanims.menu_bar.entryconfigure("Anim", state="disabled")
+        self.createanims.menu_bar.entryconfigure("Tools", state="disabled")
         self.createanims.menu_bar.entryconfigure("Import", state="disabled")
+        self.createanims.menu_bar.entryconfigure("Help", state="disabled") #Could leave this one enabled but, it doesn't feel right that the anim keeps playing in the back.
 
     def enable_all(self):
         self.createanims.anim_entry.configure(state="normal")
@@ -728,7 +730,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.edit_menu.entryconfigure("Redo", state="normal")
         self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="normal")
         self.createanims.menu_bar.entryconfigure("Anim", state="normal")
+        self.createanims.menu_bar.entryconfigure("Tools", state="normal")
         self.createanims.menu_bar.entryconfigure("Import", state="normal")
+        self.createanims.menu_bar.entryconfigure("Help", state="normal")
 
     def play_anim(self, event=None): #The one that runs over and over. Then the init code runs only once. Alternative is to create StringVar and then trace and pass this. But you still get two functions. I like more this.
         import tkinter
