@@ -30,7 +30,7 @@ class Command:
         if initial_directory is None:
             initial_directory = os.getcwd()
         chr_pal_filename = filedialog.asksaveasfilename(
-            defaultextension=".pal",
+            defaultextension=".chr.pal",
             filetypes=[("CHR Palette files", ".chr.pal"), ("All files", "*.*")],
             initialdir=initial_directory,
             title="Save CHR palette",
