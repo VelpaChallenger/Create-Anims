@@ -309,6 +309,7 @@ class Command:
                     anim_file.write(bytearray(anim.frame_ids))
             else:
                 raise ValueError(f"Could not find file_type for {affected_file}") #Yes, let's be explicit about it this time around, I wouldn't want the file_type to be skipped and just not saved or something.
+        self.createanims.undo_redo.affected_files.clear() #Has to happen at the end. Otherwise the for loop will not run.
         self.createanims.save_changes_window.destroy() #For now this. Will then implement the full logic based on affected files and such.
 
     def open_docs_in_browser(self):
