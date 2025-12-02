@@ -415,6 +415,10 @@ class CreateAnims:
             self.physics_window.focus_force()
 
     def init_log_history_window(self, event=None):
+        if self.in_play_anim:
+            from tkinter import messagebox
+            messagebox.showinfo(title="Cannot open Log History", message="You cannot open Log History while playing an anim.") #Cannot start.
+            return #Could also silently not say anything, or use the potential, planned AnimInfo but that's for more Anim specific stuff so, I'll use messagebox for this.
         self.disable_undo_redo()
         self.log_history_window = tkinter.Toplevel(self.root)
         self.log_history_window.title(f"Log History")

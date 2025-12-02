@@ -248,6 +248,9 @@ class UndoRedo:
 
     def tracer(self, event=None): #Not anymore. Brought some complications with navigations. #Will trace from stack_ptr to last_saved_ptr, in the corresponding direction, to show all unsaved changes.
         from tkinter import messagebox #It's so beautiful to have a file with no imports at the top, don't you think?
+        if self.createanims.in_play_anim:
+            messagebox.showinfo(title="Cannot save changes", message="You cannot save changes while playing an anim.")
+            return
         if not self.trace:
             messagebox.showinfo(title="No unsaved changes", message="You don't have any changes to save.")
             return False
