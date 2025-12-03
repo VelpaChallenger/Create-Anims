@@ -108,6 +108,8 @@ class CreateAnims:
         file_menu.add_command(labe="Save frame", command=self.command.save_frame)
         file_menu.add_command(label="Save anim", command=self.command.save_anim)
         file_menu.add_command(label="Save physics", command=self.command.save_physics)
+        file_menu.add_separator()
+        file_menu.add_command(label="Save changes", command=self.undo_redo.tracer)
         self.menu_bar.add_cascade(label="File", menu=file_menu)
         self.edit_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         self.edit_menu.add_command(label="Undo", command=self.undo_redo.undo, accelerator="Ctrl+Z", state="disabled")
