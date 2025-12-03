@@ -499,9 +499,8 @@ class CreateAnims:
         self.save_changes_canvas_frame = tkinter.Frame(self.save_changes_window, bd=0)
         self.save_changes_canvas_frame.pack(anchor="nw")
 
-        self.save_changes_canvas_frame.bind_all("<MouseWheel>", lambda event: self.save_changes_canvas.yview_scroll(int(-1*(event.delta/120)), "units")) #On second thought... I think I'm creating a function for this. Hmmmmmmm...
-        self.save_changes_canvas_frame.bind_all("<Up>", lambda event: self.save_changes_canvas.yview_scroll(-1, "units"))
-        self.save_changes_canvas_frame.bind_all("<Down>", lambda event: self.save_changes_canvas.yview_scroll(1, "units"))
+        self.save_changes_canvas_frame.bind("<Enter>", lambda event: self.bind_scroll(self.save_changes_canvas))
+        self.save_changes_canvas_frame.bind("<Leave>", lambda event: self.unbind_scroll(self.save_changes_canvas))
 
         save_changes_canvas_height = 140 #Will be smaller for these scrolls than it is for Log History. #Should always be this value and will use it several times so I'm defining it here.
         self.save_changes_canvas = tkinter.Canvas(self.save_changes_canvas_frame, bd=0, highlightthickness=0, height=save_changes_canvas_height, width=480)
@@ -528,6 +527,9 @@ class CreateAnims:
 
         self.save_changes_affected_files_canvas_frame = tkinter.Frame(self.save_changes_window, bd=0)
         self.save_changes_affected_files_canvas_frame.pack(anchor="nw")
+
+        self.save_changes_affected_files_canvas_frame.bind("<Enter>", lambda event: self.bind_scroll(self.save_changes_affected_files_canvas))
+        self.save_changes_affected_files_canvas_frame.bind("<Leave>", lambda event: self.unbind_scroll(self.save_changes_affected_files_canvas))
 
         save_changes_affected_files_canvas_height = 140 #Will be smaller for these scrolls than it is for Log History. #Should always be this value and will use it several times so I'm defining it here.
         self.save_changes_affected_files_canvas = tkinter.Canvas(self.save_changes_affected_files_canvas_frame, bd=0, highlightthickness=0, height=save_changes_affected_files_canvas_height, width=480)
@@ -598,6 +600,16 @@ class CreateAnims:
         self.undo_redo.decide_undo_redo_status() #Actually, only if they should be reenabled. Leave them at the state they should. Presumably, Undo should be enabled and Redo not, but, this logic will decide. #You can undo and redo again.
         self.root.attributes('-disabled', 0)
         self.root.focus_force()
+
+    def bind_scroll(self, canvas): #Not sure if we actually need the canvas, I think widget.bind_all and widget.unbind_all are the literal same to root.bind_all and root.unbind_all, but even if that, it makes it clear.
+        canvas.bind_all("<MouseWheel>", lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units")) #On second thought... I think I'm creating a function for this. Hmmmmmmm...
+        canvas.bind_all("<Up>", lambda event: canvas.yview_scroll(-1, "units"))
+        canvas.bind_all("<Down>", lambda event: canvas.yview_scroll(1, "units"))
+
+    def unbind_scroll(self, canvas):
+        canvas.unbind_all("<MouseWheel>")
+        canvas.unbind_all("<Up>")
+        canvas.unbind_all("<Down>")
 
     def disable_undo_redo(self): #Also, I understand it may be counterintuitive for this to be in CreateAnims but status to be in UndoRedo? But it makes sense to me. Here we're plain disabling for the init of a window which is part of CreateAnims.
         self.edit_menu.entryconfigure("Undo", state="disabled") #Ya know what, yes, I'll make it a method and I just call the method. #You cannot undo or redo anything here. Not until you enter your values or close the window without any ado.
