@@ -17,3 +17,23 @@ stdout, stderr = git_tag_subprocess.communicate()
 if git_tag_subprocess.returncode != 0:
     print("The commit is not associated to any tag. Please create a tag and try again.")
     exit(999)
+version = stdout.strip().decode('ascii')
+
+from datetime import datetime, timezone
+datetime_object = datetime.now(timezone.utc) #I'm liking the _object suffix.
+version_date = datetime_object.strftime("%b %d, %Y")
+
+#Preprocessing starts here.
+with open("CreateAnims.py", "r") as CreateAnims_file:
+    CreateAnims_buf = CreateAnims_file.readlines()
+
+for i, line in enumerate(CreateAnims_buf):
+    if line.strip().startswith("CREATEANIMS_VERSION_DATE"):
+        break
+
+CreateAnims_buf[i]   = f"        CREATEANIMS_VERSION_DATE = \"{version_date}\"\n"
+CreateAnims_buf[i+1] = f"        CREATEANIMS_VERSION = \"{version}\"\n"
+CreateAnims_buf[i+2] = f"        COMMIT_ID = \"{git_short_hash}\"\n"
+
+with open("CreateAnims.py", "w") as CreateAnims_file: #Yes whatever, let's use same method.
+    CreateAnims_file.write("".join(CreateAnims_buf))

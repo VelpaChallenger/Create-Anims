@@ -1,8 +1,7 @@
 #aka Editor as others might know it. But I like CreateAnims.
 
 import tkinter
-from tkinter import Tk
-from tkinter import ttk
+from tkinter import Tk, ttk, font
 import traceback
 import sys
 
@@ -577,11 +576,20 @@ class CreateAnims:
         self.about_window.grab_set()
         self.about_window.focus_force()
 
-        self.about_title = tkinter.Label(self.about_window, text="CreateAnims VelpaChallenger")
+        CREATEANIMS_VERSION_DATE = "Dec 03, 2025"
+        CREATEANIMS_VERSION = "pre-release"
+        COMMIT_ID = "2aa5ddff"
+
+        self.about_title = tkinter.Label(self.about_window, text="CreateAnims VelpaChallenger") #My idea is once I have the icon, to put the date below the icon.
         self.about_title.pack()
-        self.about_version = tkinter.Label(self.about_window, text="Version: ", anchor="nw")
+        self.about_version = tkinter.Label(self.about_window, text=f"Version: {CREATEANIMS_VERSION} {CREATEANIMS_VERSION_DATE}", anchor="nw") #Okay, let's put it here, the date.
         self.about_version.pack(anchor="nw", pady=(120, 0))
-        self.about_commit = tkinter.Label(self.about_window, text="Commit: ", anchor="nw")
+        self.about_commit = tkinter.Label(self.about_window, text=f"Commit: {COMMIT_ID}", anchor="nw", fg="blue", cursor="hand2")
+        hyperlink_font = font.Font(self.about_commit, self.about_commit.cget('font'))
+        hyperlink_font.configure(underline=True)
+        self.about_commit.configure(font=hyperlink_font)
+        commit_url = f"https://github.com/VelpaChallenger/Create-Anims/commit/{COMMIT_ID}" #Technically you can use the short version as well but... well yeah whatever. Let's do use the short one.
+        self.about_commit.bind("<Button-1>", lambda event: self.open_url_in_browser(commit_url)) #Might be good idea to have a general CreateAnims method to open URLs in the browser. In fact, I'll do just that.
         self.about_commit.pack(anchor="nw")
         thanks_text = (
         "Thanks to the following people for their contributions in one way or another!\n\n" #My personality, with exclamation and all. #Be it testing, suggestions, moral support, giving the idea etc. etc.
@@ -615,6 +623,10 @@ class CreateAnims:
         self.edit_menu.entryconfigure("Undo", state="disabled") #Ya know what, yes, I'll make it a method and I just call the method. #You cannot undo or redo anything here. Not until you enter your values or close the window without any ado.
         self.edit_menu.entryconfigure("Redo", state="disabled")
         self.edit_menu.entryconfigure("Switch UndoRedo branch", state="disabled")
+
+    def open_url_in_browser(self, url):
+        import webbrowser
+        webbrowser.open(url, new=2)
 
     def refresh_UI(self): #This will be part of CreateAnims. All directly UI-related, idea is that it's here. Maybe not the technical like more specific code per se, but at least the highest layer.
         self.tile_utils.refresh_palette() #Changed my mind, will be part of a refresh/update UI.
