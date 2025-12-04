@@ -9,7 +9,7 @@ from tkinter import ttk
 CHUNK_SIZE = 4096
 
 def thread_download():
-    with requests.get("https://github.com/VelpaChallenger/CreateAnims/releases/latest/download/create_anims.zip", stream=True) as request:
+    with requests.get("https://github.com/VelpaChallenger/CreateAnims/releases/latest/download/CreateAnims.zip", stream=True) as request:
         download_bar['maximum'] = int(request.headers.get('Content-Length'))
         request.raise_for_status()
         with open("new_create_anims.zip", "wb") as new_create_anims_zip:
@@ -22,7 +22,7 @@ def post_download():
     with zipfile.ZipFile("new_create_anims.zip", 'r') as zip_file:
         zip_file.extractall(".")
     os.remove("new_create_anims.zip")
-    subprocess.Popen("create_anims.exe") #With this, the updater closes and ends. #Also it has to be in this order, if you run destroy first, this never runs. Like priorities and such. #Nah it can happen in any order the important part is that the destroy doesn't happen in a thread.
+    subprocess.Popen("CreateAnims.exe") #With this, the updater closes and ends. #Also it has to be in this order, if you run destroy first, this never runs. Like priorities and such. #Nah it can happen in any order the important part is that the destroy doesn't happen in a thread.
     root.destroy()
 
 root = tkinter.Tk()
