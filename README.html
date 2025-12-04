@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>CreateAnims docs</title>
+        <title>CreateAnims Docs</title>
         <style>
             body {
                 width: 100%;
@@ -8,6 +8,10 @@
                 margin: 0;
                 font-family: 'Lato', sans-serif;
                 line-height: 1.6em;
+            }
+
+            ul {
+                margin-left: 40px;
             }
 
             dt {
@@ -24,6 +28,10 @@
             h3 {
                 color: #000;
                 margin-left: 1em;
+            }
+
+            h4 {
+                margin-left: 2.5em; /*Same as paragraphs.*/
             }
 
             p {
@@ -56,30 +64,216 @@
         <div class="content">
             <div class="banner-divider"></div>
             <div class="inner-content">
-                <h2>Title 1</h2>
+                <h2>Introduction</h2>
                 <p>
-                    Title 1 general description.
+                    The idea behind CreateAnims is to ease the edition of binary files which otherwise are hard to edit and see the impact of the changes immediately. And it was originally intended for MK3. 
+                    
+                    <br><br>Before CreateAnims, to change the length of the idle animation for example (which in the original game is quite fast), we would have to find the corresponding physics row in the ROM (no binary files per se), add/remove the bytes and make sure we remove them in pairs (X and Y) which made it highly error-prone, and then modify the values, always keeping in mind that for negatives, we need to use 2's complement. And then we needed to go character by character adding the necessary frames. All of those details were abstracted in CreateAnims, which means all you have to do is Edit physics, add the corresponding columns, see the immediate effects of your changes in the graph, and then you can navigate from character to character adding the necessary frames. And if there's any error or inconsistency between the physics and the frames, this is reported.
+
+                    <br><br>The same goes for other kinds of changes. If you wanted to change Stryker's throw animation for example, to extend the length of some frames, you would have to go to the corresponding character's file. Then modify the values and <em><strong>*hope*</strong></em> (this word is key, and was annoying even for me) that you're modifying the correct values. Because all you see is numbers, and I do have a list on what some numbers mean but I still can't <em><strong>*see*</strong></em> it (this is the other key word). So you want to insert some frame but you don't know the number and you need to put breakpoints and stuff in the emulator to find out, or go through your lists... it's not straightforward.
+
+                    <br><br>For programmers, I don't think this is that bad of an issue after you get used to it, but the idea is that non-programmers like people focused on graphics, that they can add animations, extend/remove frames etc. etc. and everything without having to fully understand the details behind the scenes, under the hood. And without having to exchange a lot of files for every single change, and be like oh there's this thing here missing, there's this other, and stuff like that.
+
+                    <br><br>So you could say the main reason behind CreateAnims and the target for CreateAnims are non-programmers who still want to add new animations to game, modify existing animations and all of this without going through the harsh processes I described above.
+                    (plus, it was a lot of fun and I always wanted to do something like this, to go through the experience.)
+
+                    <br><br>That's it. So on with the explanation on the features! Let's get started!
                 </p>
 
-                <h3>Title 2</h3>
+                <h3>Contents</h3>
                 <p>
-                    Title 2 general description with options descriptions:
+                    I will divide the contents by actions you can take in each section (the menus, the stage, the palette and so on and so forth). If something can be done multiple ways (for example, clicking on a button, using the arrow keys, using a keyboard shortcut), I will clarify it but I will leave the action associated to the section that makes more sense to me:
                 </p>
 
                 <dl>
-                    <dt>Action</dt>
-                    <dd>Action description</dd>
-                    <dt>Preferences(List)</dt>
-                    <dd>
-                    ListDescription and then items:
-                    <dl>
-                        <dt>SubAction</dt>
-                        <dd>SubActionDescription</dd>
-                    </dl>
-                    </dd>
-                    <dt>MoreAction</dt>
-                    <dd>MoreActionDescription</dd>
+                    <dt><a href="#Anim Stage">Anim Stage</a></dt>
+                    <dd>The portion you see at the top, just below the menus.</dd>
+                    <dt><a href="#Palette">Palette</a></dt>
+                    <dd>The portion just below the Anim Stage, at the left. Allows you to modify the palette used for the character.</dd>
+                    <dt><a href="#CHR">CHR</a></dt>
+                    <dd>The portion just below the Anim Stage, at the right, next to Palette.</dd>
+                    <dt><a href="#Anim Command Base">Anim Command Base</a></dt>
+                    <dd>You can modify all animation and frame-related here. Like current character, frame, animation etc. etc.</dd>
+                    <dt><a href="#Physics">Physics</a></dt>
+                    <dd>A new window opens and shows a graph of what the current animation looks like in terms of movement. You can edit coordinates as well.</dd>
+                    <dt><a href="#UndoRedo">UndoRedo</a></dt>
+                    <dd>Actions related to redoing and undoing stuff, including my shiny makes-me-proud Switch Branch.</dd>
+                    <dt><a href="#Import">Import</a></dt>
+                    <dd>Accessible only via the menu. Allows to import all file types (.chr, .chr.pal, .frame, .anim, .pal and .physics)</dd>
+                    <dt><a href="#Save">Save</a></dt>
+                    <dd>Individual save accessible only via the menu, Save Changes accessible also via keyboard shortcut.</dd>
+                    <dt><a href="#Tools">Tools</a></dt>
+                    <dd>Tools added to ease either debugging crashes in CreateAnims (let's hope there aren't as much! but if there are please report them!) or understanding the actions taken, or both.</dd>
                 </dl>
+
+                <p><b>WARNING</b>: You can see the updated shortcuts by going through the menu and then taking a look at the shortcut displayed to the right of the text. I will do my best to keep the docs in sync but if on doubt, CreateAnims has the final word as for the correct shortcut.</p>
+
+                <h3 id="Anim Stage">Anim Stage</h3>
+                <p>
+                    When CreateAnims first starts (or when you first open a directory), you will see a character drawn with a red rectangle around it (showing the boundaries of the frame) and then blue rectangles highlighting the empty $FF tiles.
+
+                    <br><br>The idea here is that you can easily determine how big the frame actually is (sometimes, the frame is pretty big but only a few portions contain sprites, which can be useful to then free memory) and at the same time you can easily spot the available spaces by looking at the empty $FF tiles.
+
+                    <br><br>You can toggle those with the following keyboard shortcuts and also via the Anim menu:</p>
+                    <ul>
+                        <li><b><em>Shift+T</em></b>: Toggle transparency. If on, won't draw any specific color for transparent pixels. If off, will draw black (as additional info, transparency is always off for CHR). Default: True (show transparency).</li>
+                        <li><b><em>r</em></b>: Toggle (red) rectangle around frame. If on, a red rectangle will be drawn about the frame highlighting the boundaries of the frame. Default: True.</li>
+                        <li><b><em>e</em></b>: Toggle draw empty cells (blue rectangles). In other words, the empty $FF tiles. If on, will draw them in blue. Default: True.</li>
+                    </ul>
+                    <p>Actions you can take on the frame itself (not by using the buttons and interface in the Anim Command Base, that will be expanded on another section below):</p>
+                    <ul>
+                        <li><b><em>Left click</em></b>: Select a tile. If there is a CHR tile selected, it will update the tile in the frame with that of the CHR. Otherwise doesn't do anything on its own other than changing the selection in the frame.</li>
+                        <li><b><em>Right click</em></b>: Select a tile in both the frame and the CHR. Doesn't do anything on its own other than changing the selection.</li>
+                        <li><b><em>Double right click</em></b>: Empty the selected tile (i.e. turn it into an empty $FF tile).</li>
+                    </ul>
+
+                <h3 id="Palette">Palette</h3>
+                <p>
+                    There's two sections of colors: the upper one distinguishes the character's palette (8 colors total counting the background). The bottom one is a color picker where you can choose new colors from to update the character's palette.
+
+                    <br><br>To update the character's palette, select first the index you wish to update (for example, color in position 1, position 2, etc.) and then select the color you want to update it to. The changes will apply immediately.
+
+                    <br><br>You can also hover over the colors to see what they're set to or what their values are (palette values are always displayed in hex as at least to me they seem more readable that way). Do keep mind the value shown in the Palette field always reflects the hover and not the selection, except for when you update the color for the character's palette. Also the hover applies only for the character's palette, not the color picker (but it follows rows system, from $00 to $0F one row, from $10 to $1F the other row and so on and so forth).
+                </p>
+                <h3 id="CHR">CHR</h3>
+                <p>
+                    There's the CHR bank field which shows the currently selected CHR bank, and then there's a rectangle portion showing all the CHR in the currently selected 2K of CHR. Every character uses 2K of the total 4K for sprites in the same way that every character uses 8 colors out of the total 16 for the palette.
+
+                    <br><br>There's also a CHR Info which will show some information depending on the changes you make or try to make (there are validations in place, as there are things you can't do!). Information is displayed in <span style="color:blue">blue</span>, and validation errors are displayed in <span style="color:red">red</span>.
+
+                    <br><br>To change the currently selected CHR, you can either enter the new value in the entry field, or use the arrows. Notice the navigation here is on steps of 2 because each unit refers to 1K of CHR and each character has 2K of CHR loaded at a time. Also, when you update the CHR, the frame data will be automatically updated to reflect this new value, so the frame will be redrawn accordingly.
+
+                    <br><br>Actions you can take on the CHR rectangle: </p>
+                    <ul>
+                        <li><b><em>Left click</em></b>: Select a tile. Doesn't do anything on its own other than changing the selection in the CHR.</li>
+                        <li><b><em>Double left click</em></b>: Toggle the tile's palette. Tiles can use palette group 0 or 1 (remember one tile can use only 4 colors at a time including the background or also called backdrop color, which is the transparency), and this toggles it. Sprite priority stuff is not considered here, those will be highly specific to the game in question.</li>
+                        <li><b><em>Double right click + drag</em></b>: Toggle the palette for all tiles as you move the mouse while right clicking. Keep in mind that until you release, you cannot toggle the palette for an already toggled tile. If you regret your decision, you can either undo (more details on the respective section) or double right click again (or you could also just double left click to apply the change on just one tile or a few tiles).</li>
+                    </ul>
+                <p>
+                    To add new CHR, first make sure the CHR bank really is empty. I could add a check to see if the CHR bank is used maybe by another character but either way it'll be up to the user to check if the CHR bank is being used for other purposes like stages for example. You will also get this information in blue when you encounter an empty CHR bank for the currently selected character. How it works is that CreateAnims checks the ID in each .chr file, and if the new ID is not present in those, then it is considered new. But again, you have the final word on whether that's true or not.
+
+                    <br><br>Here's the intended workflow: you make the CHR in an external tool like YY-CHR. Then you search for free CHR space in the ROM. You identify the bank number. Then you enter it in CreateAnims for the character you want to associate the CHR to. You import the CHR. And now when you save, you can either save the CHR individually or you can use Save Changes and it will create the CHR file in the characters directory (you may have to manually update CHR palette, but you can do all of that within CreateAnims). For sure, there will still be some file exchanges between programmers and graphics team but you can do all the file creation in CreateAnims and then just send the files to the programming team. It simplifies the workflow and exchange, it doesn't remove it entirely, and that's fine, work as a team!
+
+                    <br><br>Also, <u>as a reminder</u> (I will say this a lot so if you've already read it feel free to skip it), adding new CHR doesn't mean you'll see it right away in the ROM. The new file will be created, but it's up to the user to add it to the ROM wherever there is free space and then to configure everything to be able to use the newly added data.
+                </p>
+                <h3 id="Anim Command Base">Anim Command Base</h3>
+                <p>
+                    Get ready! This is your Anim Command Base!
+
+                    <br><br>There are many buttons and fields here though I tried to keep it as simple as possible and I'm including other potential changes as settings or checkboxes. Anyways, in general they all work the same way as CHR bank does. You have an entry where you can input a value and then press Enter and it'll be processed right away. Or, you can click on the arrows and it will be processed right away too.
+
+                    <br><br>Worth noting is the difference between navigation and change, though I'll cover the details of that in the <a href="#UndoRedo">UndoRedo</a> section. But for example, the Anim, Frame and Character fields are navigation, not changes. Which means, when you go from Anim 00 to Anim 20 for example, a new frame is drawn according to whatever frame ID is set for frame 00 of the selected anim, but no files are affected because, well, you aren't changing anything, you're just navigating.
+
+                    <br><br>Here's a breakdown of what each field means:</p>
+                    <h4>Animation-related</h4>
+                    <ul>
+                        <li><u>Anim</u>: The currently selected animation. Every character has animations (states) in which they can be.</li>
+                        <li><u>Frame</u>: The frame where we are in the currently selected animation. Every state in the animation has something to draw. Each singular state is the frame.</li>
+                        <li><u>Frame ID</u>: And what to draw at that frame is the frame ID. For example, you could have Frame ID 01 for frames 0 to 3. That means, for states 0 to 3 of the current animation, draw the same frame 01. In other words, you can extend the length a frame is shown by adding the same frame ID to different frames of the animation.</li>
+                        <li><u>Physics ID</u>: The physics the animation uses. Please keep in mind, those affect <em><strong>*every*</strong></em> character in the game. I'll say that again: <em><strong>*every*</strong></em> character. If I had to guess why it was designed that way, I'd say to make reuse easier. In general, except for special abilities, every animation has the same physics for every character. Every character walks at the same speed, jumps the same amount of X and Y etc. etc. So this is more of usage tips which I will include below but for new abilities, you'll most likely need a new physics ID too that will be exclusive to that character.</li>
+                    </ul>
+
+                <p>
+                    You can add physics IDs that are unique to one character and one anim. But you have to enforce that, like, keep a list of what should be unique and what should not. CreateAnims cannot know this, as some physics IDs are meant to be shared, others are not. That is your decision to make.
+
+                    <br><br>Also, if the amount of frames in the physics doesn't match the amount of frames in the animation, you'll get a warning (there's a very high chance you'll see graphical bugs in the ROM and inconsistencies with what is shown in CreateAnims). This warning can help you catch bugs: in MK3, there are quite a few characters with this issue like Liu Kang when it does a low spinning kick. And with this warning, you catch it immediately.
+                </p>
+                    <h4>Frame-related</h4>
+                    <ul>
+                        <li><u>X Offset</u>: It's the distance in X from the current X player position. If you're familiar with video game development this might be already familiar to you but in summary there are situations where you want pixel-accurate positioning and only offsets can give you that (width and height are always in units of 8). Offsets also allow for stuff like collisions and hitboxes/hurtboxes, like you see the character or projectile in one position but it's actually in another, can help in platformer games for stuff like spikes, your character was already on spikes but the collision didn't detect it because the drawing is far ahead, stuff like that.</li>
+                        <li><u>Y Offset</u>: Same as X offset, but for Y. Internally it is handled differently than X offset but the concept is the same.</li>
+                        <li><u>Width</u>: How many 8x8 boxes from the starting position (always left unless sprites are flipped). Valid values only from 1 onwards in other words positive integers different from zero.</li>
+                        <li><u>Height</u>: How many 8x8 boxes from the starting position and upwards.</li>
+                    </ul>
+
+                <p>
+                    One way to look at it is that width*height = total amount of tiles (including empty $FF tiles).
+                </p>
+                    <h4>Additional fields</h4>
+                    <ul>
+                        <li><u>Character</u>: The ID of the selected character. Beware, this will not necessarily match the ID as known in-game. CreateAnims assigns the ID based on the order found when traversing the folders in the character directory. In the future (and perhaps as you're reading this), I plan to add an option for this.</li>
+                    </ul>
+                    <h4>Buttons</h4>
+                    <ul>
+                        <li><u>Play Anim</u>: Starts playing the currently selected anim from frame 00. If you were on frame 03 for example when you started playing the anim, this state will be restored when you click on 'Stop Anim' (meaning, you can go back to the frame you were modifying for example). Keep in mind a framerate of 20FPS is assumed. And, you can't do edits of any kind while playing an anim. You will get messages if you do. Avoid them!</li>
+                        <li><u>Stop Anim</u>: Stops playing the currently playing anim. Allows you to go back to edition.</li>
+                        <li><u>Edit Physics</u>: Opens the Create Anims Physics Manager. More on that in the section immediately below.</li>
+                    </ul>
+                <h3 id="Physics">Physics</h3>
+                <p>
+                    Physics are what give anims movement. Anims on themselves don't move. They might give the illusion of moving due to the changes in Y and X offsets, but they aren't moving. Technically speaking, without physics, the images are always placed at the exact same location. So that's what I mean when I say that they don't move (I do agree that we could argue they do move based on the definition we take, but under this definition, no, they don't move without physics).
+
+                    <br><br>The idea behind is again to have a clearer visualization of how a new ability is going to look, for example. Or how walking is going to look, if you wanted to adjust speed for example. This goes for everything, for MK3 it goes for fatalities as well, potential brutalities and a long etcetera. You can take a look at the graph also to get an idea of how it looks from a graph perspective.
+
+                    <br><br>To edit physics, click on 'Edit Physics' button and a new Physics Window will open (the Create Anims Physics Manager).
+                </p>
+
+                <h4>Create Anims Physics Manager</h4>
+                <p>
+                    When it first opens, it will show you a graph showcasing with red dots the movement of the current anim, along with green lines that connect them. Below the graph, you will see a table where you can see how the physics change per animation frame.
+
+                    <br><br>A positive value in X means <em>forwards</em>, that is, <em>rightwards</em>. A negative value in X means <em>backwards</em>, that is, <em>leftwards</em>.
+                    <br><br>A positive value in Y means <em>downwards</em>. A negative value in Y means <em>upwards</em>.
+
+                    <br><br>Every physics is assumed to start at a point where it cannot go downwards (the center). This is because usually every animation always moves upwards and then downwards but never downwards from the start. Exceptions would be special moves where the character goes down through the ground, but even those can be correctly displayed in the table, just nothing will be shown below.
+                
+                    <br><br>Actions you can take on frames in the table:</p>
+                    <ul>
+                        <li><b><em>Right click</em></b>: Removes the frame.</li>
+                        <li><b><em>Shift + Right click</em></b>: Inserts a new frame immediately afterwards. For example, if the physics has 6 frames and you Shift + Right click on frame 4, a new frame will be inserted between frame 4 and frame 6.</li>
+                        <li><b><em>Shift + Left click</em></b>: Opens the Physics Dialog where you can update X and Y values for that frame. When the window first opens, X is selected so you can quickly enter a value and then press enter to see the changes in the graph right away. You can also press tab and then enter a value for Y to enter new values for both quickly.</li>
+                    </ul>
+                <h3 id="UndoRedo">UndoRedo</h3>
+                <p>
+                    UndoRedo allows you to undo actions that you regret deeply in your heart, or maybe actions that you simply regret, or you want to update something, and maybe you want to go back to previous state because you just wanted to peek at something but that's all so now you want to redo... stuff like that. I mean, I think everyone uses UndoRedo? Ok but still, if you didn't know, now you do :D .
+
+                    <br><br>Here's how it works: you start at point 0. Then, as you do stuff, you go from one point to the other, or in other words from one state to the other. So state 0, state 1, state 2 etc. etc., and every time you undo, you go back to the previous state, and every time you redo, you go to the next state (so yes, you can only redo if you first undid). This is what I call the UndoRedo.
+                    <br><br>How to navigate through the UndoRedo: </p>
+                    <ul>
+                        <li><b><em>Ctrl+Z</em></b>: Undo the last operation. You can also go to Edit menu and then click on Undo.</li>
+                        <li><b><em>Ctrl+Y</em></b>: Redo the last operation. You can also go to Edit menu and then click on Redo.</li>
+                        <li><b><em>Ctrl+Shift+Z</em></b>: Switch branches.</li>
+                    </ul>
+                <p>
+                    For physics specifically, sometimes it might feel like the Undo or the Redo didn't do anything if you imported a physics file (I couldn't find an usecase for this but hey, you can still do it). This is expected and to see the changes you need to go into Edit physics. The reason why it happens is because when you do the import, the physics file is internally modified but it's not visible in any way. I could add a messagebox if people wanted it but I thought it shouldn't happen very often (key word shouldn't) and in a lot of cases you'll probably get the warning which will let you know there was a change in physics. But still, I'm putting it here as a heads up.
+
+                    <br><br>For things you can do, there's navigation and there's change. However both are considered for the UndoRedo. Meaning, if you navigated from one anim to the other or from one character to the other, you will be able to Ctrl-Z/Undo that. But only the changes will be considered for the Save (more on that in the Save section). And, not absolutely everything is saved, for example selection changes are not saved (so if you click on one palette then another, this is not saved, same if you click on one tile in the CHR and then another, this is not saved).
+                </p>
+                <h4>Switch Branch</h4>
+                <p>
+                    So I'd like to expand a bit more on Switch Branch. The idea behind is, haven't you ever encountered yourself in a situation where you were undoing something, you wanted to see how stuff was at that point, but then you wanted to go back, but then you accidentally make a change, and you're unable to go back?! That's a terrible situation to be in, and I said to myself, I will change things!
+
+                    <br><br>You can only Switch Branch if there actually is another branch. So you need to be in a situation like the one I described. You make some changes, you go back, and now you do other changes, then you have two branches: one with your original changes, another with your new changes, and, you also have a common point: the point where they diverged. The point where the two branches were created. So, if there are 2 branches, and you Switch Branch, you will be taken back to the common point. If you again Switch Branch, you will remain in the common point but CreateAnims will now be pointing at the other branch, meaning that a Redo will take you through the other branch. Because of the nature of the Switch Branch, you can only actually do it if you're at the common point or after. You cannot do it from before that.
+
+                    <br><br>Also please keep in mind you can have a maximum of 2 branches at a time. If you again make some other changes after Switch Branch'ing, your changes will be lost. In this sense, do keep in mind that if you save changes, you go back say 2 steps, and do new changes, and then Switch Branch and do more changes, you will be unable to go back to the last saved point! And also to any intermediary step, like if you went 2 steps backwards originally, you'll be unable to go to the 1 step previous to the saved point. This is the same way that pretty much every tool with UndoRedo works, but, in CreateAnims you have the Switch Branch which makes it harder for you to end up in a situation like that. I wish this feature was more popular.
+                </p>
+                <h3 id="Import">Import</h3>
+                <p>
+                    Import is specially meant for CHR, but can be used for all other types of files. Say you detected a frame in another game and you want to see how it looks here, you can do that. Same with an anim, or a CHR palette, etc. etc.
+
+                    <br><br>You can only access the import options via the Import menu.
+                </p>
+                <h3 id="Save">Save</h3>
+                <p>
+                    You can save individual files, or save all changes as you do them. In the case of the latter, new files will be created in case you added anything new (like new CHR for the currently selected character).
+
+                    <br><br>You can save all changes by using the keyboard shortcut <b><em>Ctrl+S</em></b> or by clicking on <b><em>Save changes</em></b> in the File menu. When you do, a new Save changes window opens, highlighting in two blocks:</p>
+                    <ul>
+                        <li><u>Changes about to be saved</u>: Shows the changes (excludes navigation) done since last save until now (if CreateAnims was just opened, last save means the state when you just opened it). In case you do changes, then undo those, these will be removed from this list as well. For a complete list of what you did, you can check the Log History tool.</li>
+                        <li><u>Affected files</u>: Shows the detected affected files. Only those files are touched and overwritten (or created in the case of additions). You will be asked to confirm.</li>
+                    </ul>
+                <p>
+                    When you first start CreateAnims, the title will be Create Anims, but will expand to Create Anims - Saved when you save and don't make any other changes. If you do changes (including Undo/Redo if applicable), you'll see Create Anims - Unsaved changes.
+                </p>
+                <h3 id="Tools">Tools</h3>
+                <h4>Log History</h4>
+                <p>
+                    Shows every single navigation and change you did (yes, every single one! don't keep any secrets!). The Log History is meant as both a debugging and to-be-used-as-you-use-CreateAnims tool, for tracking purposes and stuff. As such, in case CreateAnims crashes (hope it doesn't happen! but if it does, please report it!), a file <em>crash_log.txt</em> will be created and will include the error description along with the Log History, to have a broader context on what exactly could have made it crash. It can also help to understand behavior that may be not expected, but that is still correct considering the technicalities of how it works.
+
+                    <br><br>To access it, use keyboard shortcut <b><em>Ctrl+L</em></b> or click on <b><em>Log History</em></b> in the Tools menu.
+
+                    <br><br>Caveat: for imports, when you undo, you will see Filename: None. This is not a bug, this means that you're going back to a state previous to an import. That is all.
+                </p>
             </div>
             <div class="banner-divider"></div>
         </div>
