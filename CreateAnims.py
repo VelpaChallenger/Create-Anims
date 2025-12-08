@@ -605,8 +605,8 @@ class CreateAnims:
         self.about_commit_id.pack(side="left")
         thanks_text = (
         "Thanks to the following people for their contributions in one way or another!\n\n" #My personality, with exclamation and all. #Be it testing, suggestions, moral support, giving the idea etc. etc.
-        "\t-\n"
-        "\t-"
+        "\t-Rkk\n"
+        "\t-drax01"
         )
         self.about_thanks = tkinter.Label(self.about_window, text=thanks_text, anchor="nw", justify="left")
         self.about_thanks.pack(anchor="nw")
